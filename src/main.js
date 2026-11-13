@@ -172,11 +172,14 @@ if (reduced) {
     .to(".warp-hint.h1", { opacity: 1, duration: 0.04 }, 0.3)
     .to(".warp-hint.h1", { opacity: 0, duration: 0.03 }, 0.39)
     .to(".warp-line.l1", { opacity: 0, filter: "blur(14px)", y: -30, duration: 0.05 }, 0.4)
-    .to(".warp-rays", { opacity: 1, rotate: 25, duration: 0.1 }, 0.44)
-    .to(".warp-line.l2", { opacity: 1, filter: "blur(0px)", duration: 0.08 }, 0.52)
+    // "Yours shouldn't." starts small behind the wall, then punches through it
+    .fromTo(".warp-line.l2", { opacity: 0, scale: 0.18, filter: "blur(10px)" }, { opacity: 0.55, scale: 0.42, filter: "blur(4px)", duration: 0.07 }, 0.41)
+    .to(".warp-line.l2", { opacity: 1, scale: 1, filter: "blur(0px)", ease: "power3.in", duration: 0.05 }, 0.48)
+    .fromTo(".warp-pin", { x: 0 }, { x: 10, duration: 0.006, yoyo: true, repeat: 5, ease: "none" }, 0.525)
+    .to(".warp-rays", { opacity: 1, rotate: 25, duration: 0.05 }, 0.515)
+    .to(".warp-rays", { opacity: 0, rotate: 45, duration: 0.12 }, 0.56)
     .to(".warp-hint.h2", { opacity: 1, duration: 0.04 }, 0.62)
     .to(".warp-hint.h2", { opacity: 0, duration: 0.03 }, 0.71)
-    .to(".warp-rays", { opacity: 0, rotate: 45, duration: 0.1 }, 0.72)
     .to(".warp-line.l2", { opacity: 0, scale: 1.25, filter: "blur(10px)", duration: 0.06 }, 0.72)
     .set({}, {}, 1);
 

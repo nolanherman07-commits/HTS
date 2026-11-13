@@ -77,6 +77,8 @@ export function startScene(canvas, opts = {}) {
         rot: new Euler(rand(0, 6.3), rand(0, 6.3), rand(0, 6.3)),
         spin: new Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)).multiplyScalar(0.6),
         delay: rand(0, 0.55),
+        tumble: new Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)).normalize(),
+        kick: rand(0.7, 1.3),
         phase: rand(0, 6.3),
       });
     }
@@ -158,7 +160,7 @@ export function startScene(canvas, opts = {}) {
     const baseX = mobile ? 2.5 : 2.9;
     gp += (gridP - gp) * 0.14;
     const gA = smooth(gp / 0.32);                 // cubes fly back into a wall
-    const fl = (gp - 0.32) / 0.24;                // gold flip ripples across it
+    const sm = (gp - 0.32) / 0.24;                // "Yours shouldn't." smashes through from behind                // gold flip ripples across it
     const out = (gp - 0.56) / 0.3;                // tiles burst toward the screen
     const keep = 1 - gA;
     world.position.set(baseX * (1 - burst * 0.6) * keep, ((mobile ? 3.4 : 0) + burst * (mobile ? -3 : 0.3)) * keep, 0);
@@ -178,17 +180,24 @@ export function startScene(canvas, opts = {}) {
       if (gp > 0.001) {
         const gk = smooth(gA * 1.25 - c.center * 0.25);   // centre tiles land first
         tmp.lerp(c.grid, gk);
-        const fk = smooth(fl * 1.7 - c.col * 0.7);          // flip wave runs left to right
-        qFlip.setFromAxisAngle(yAxis, Math.PI * fk);
-        dummy.quaternion.slerp(qId, gk).multiply(qFlip.slerp(qId, 1 - gk));
-        const ok = smooth(out * 1.5 - c.center * 0.5);       // centre bursts out first
-        tmp.z += ok * (12 + c.center * 6);
-        tmp.x *= 1 + ok * 0.6; tmp.y *= 1 + ok * 0.6;
-        const flash = Math.sin(Math.PI * Math.min(fk, 0.5)) * gk; // turns gold and stays gold
-        col.copy(c.base).lerp(flashCol, Math.min(1, flash * 0.6 + ok * 0.3));
+        // the wall bulges toward you at the centre, then shatters outward
+        const bulge = Math.sin(Math.PI * Math.min(1, Math.max(0, sm / 0.55))) * Math.pow(1 - c.center, 2) * (sm < 0.55 ? 1 : 0);
+        const hk = smooth((sm - 0.45) * 2.0 - c.center * 0.45) * gk;
+        const rx = c.grid.x || 0.001, ry = c.grid.y || 0.001, rl = Math.hypot(rx, ry) || 1;
+        tmp.x += (rx / rl) * hk * (7 + c.center * 9) * c.kick;
+        tmp.y += (ry / rl) * hk * (5 + c.center * 7) * c.kick;
+        tmp.z += bulge * 1.6 + hk * (3 + (1 - c.center) * 6) * c.kick;
+        dummy.quaternion.slerp(qId, gk);
+        qFlip.setFromAxisAngle(c.tumble, hk * Math.PI * 2.2 * c.kick);
+        dummy.quaternion.multiply(qFlip);
+        const ok = smooth(out * 1.5 - c.center * 0.5);
+        tmp.z += ok * 10;
+        const flash = Math.sin(Math.PI * Math.min(1, hk * 1.4)) * 0.8 + bulge * 0.4;
+        col.copy(c.base).lerp(flashCol, Math.min(1, flash));
         c.mesh.setColorAt(c.j, col);
         s = s + (tile - s) * gk;
-        dummy.scale.set(s * (1 + flash * 0.12), s * (1 + flash * 0.12), s * (1 - gk * 0.55));
+        const shrink = 1 - hk * 0.35;
+        dummy.scale.set(s * shrink, s * shrink, s * (1 - gk * 0.55) * shrink);
       } else {
         c.mesh.setColorAt(c.j, c.base);
         dummy.scale.setScalar(s);
