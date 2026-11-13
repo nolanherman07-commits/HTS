@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Herman Technical Solutions | Real Estate Agent Websites</title>
+<meta name="description" content="Websites for real estate agents that win the lead before the first call. Built by an agent, for agents. Basic, Premium and Elite plans.">
+<meta property="og:title" content="Herman Technical Solutions | Real Estate Agent Websites">
+<meta property="og:description" content="Websites that win the lead before the first call. Built by an agent, for agents.">
+<meta property="og:image" content="https://nolanherman07-commits.github.io/hts-website/images/elite.jpg">
+<meta property="og:type" content="website">
+<link rel="icon" href="images/hts-icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="images/HTS-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#14213d; --deep:#0c1528; --ink:#101827; --gold:#c9a227; --gold-2:#e0bd4a;
+  --cream:#f6f3ec; --paper:#fffdf8; --line:#e4ddcf; --muted:#5b6475; --soft:#c9d0de;
+  --head:'Space Grotesk', Arial, sans-serif; --body:'Inter', Arial, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--body);color:var(--ink);background:var(--cream);line-height:1.55;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit}
+h1,h2,h3{font-family:var(--head);line-height:1.08;letter-spacing:-.01em}
+.wrap{width:min(1180px,92vw);margin:0 auto}
+.eyebrow{font-size:.8rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.section{padding:110px 0}
+.section h2{font-size:clamp(2rem,4.2vw,3.2rem);margin:.6rem 0 1rem}
+.lead{font-size:1.15rem;color:var(--muted);max-width:640px}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.95rem 1.6rem;border-radius:999px;font-weight:600;text-decoration:none;border:1.5px solid transparent;transition:transform .2s,background .2s,color .2s;cursor:pointer;font-family:var(--body);font-size:1rem}
+.btn:hover{transform:translateY(-2px)}
+.btn.gold{background:var(--gold);color:var(--deep)}
+.btn.gold:hover{background:var(--gold-2)}
+.btn.ghost{border-color:rgba(255,255,255,.35);color:#fff}
+.btn.ghost:hover{border-color:var(--gold);color:var(--gold-2)}
+.btn.navy{background:var(--navy);color:#fff}
+
+/* nav */
+header{position:fixed;inset:0 0 auto;z-index:50;transition:background .3s, box-shadow .3s}
+header.scrolled{background:rgba(12,21,40,.92);backdrop-filter:blur(10px);box-shadow:0 1px 0 rgba(255,255,255,.06)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:76px}
+.brand{display:flex;align-items:center;gap:.7rem;text-decoration:none;color:#fff}
+.brand svg{width:46px;height:46px}
+.brand b{font-family:var(--head);font-size:1.05rem;letter-spacing:.02em;display:block;line-height:1.1}
+.brand small{display:block;font-size:.66rem;letter-spacing:.22em;color:var(--gold);font-weight:600}
+.nav nav{display:flex;align-items:center;gap:1.8rem}
+.nav nav a{color:#dfe4ee;text-decoration:none;font-size:.95rem;font-weight:500}
+.nav nav a:hover{color:var(--gold-2)}
+.nav nav .btn{padding:.6rem 1.2rem;font-size:.9rem;color:var(--deep)}
+@media(max-width:860px){.nav nav a:not(.btn){display:none}}
+
+/* hero */
+.hero{background:radial-gradient(1200px 600px at 85% 10%, #22345e 0%, transparent 60%), var(--deep);color:#fff;padding:150px 0 90px;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center}
+.hero h1{font-size:clamp(2.6rem,5.6vw,4.4rem);margin:1rem 0 1.2rem}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero p.sub{font-size:1.2rem;color:var(--soft);max-width:520px}
+.hero .ctas{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:2rem}
+.hero .proof{display:flex;gap:2.2rem;margin-top:2.6rem;color:var(--soft);font-size:.9rem;flex-wrap:wrap}
+.hero .proof b{display:block;font-family:var(--head);font-size:1.6rem;color:#fff}
+.browser{border-radius:16px;background:#1b2848;padding:10px;box-shadow:0 40px 80px rgba(0,0,0,.45);transform:rotate(1.2deg)}
+.browser .dots{display:flex;gap:6px;padding:4px 6px 10px}
+.browser .dots i{width:10px;height:10px;border-radius:50%;background:#3a4a72}
+.browser img{border-radius:8px}
+.hero-shots{position:relative}
+.hero-shots .phone{position:absolute;left:-36px;bottom:-40px;width:150px;border-radius:22px;border:6px solid #0b0f1c;box-shadow:0 30px 60px rgba(0,0,0,.5);transform:rotate(-4deg)}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr}.hero-shots{margin:10px 10px 40px}.hero-shots .phone{left:-6px;width:110px}}
+
+/* work */
+.work{padding-top:90px}
+.wgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:22px;margin-top:2.6rem}
+.wcard{grid-column:span 2;background:var(--paper);border:1px solid var(--line);border-radius:18px;overflow:hidden;text-decoration:none;transition:transform .25s, box-shadow .25s}
+.wcard:nth-child(4),.wcard:nth-child(5){grid-column:span 3}
+.wcard:hover{transform:translateY(-6px);box-shadow:0 24px 50px rgba(20,33,61,.16)}
+.wcard img{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top}
+.wcard div{padding:18px 22px 22px;display:grid;gap:2px}
+.wcard small{font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.wcard b{font-family:var(--head);font-size:1.3rem}
+.wcard span{color:var(--navy);font-weight:600;font-size:.92rem;margin-top:.3rem}
+@media(max-width:860px){.wgrid{grid-template-columns:1fr}.wcard,.wcard:nth-child(4),.wcard:nth-child(5){grid-column:auto}}
+
+/* problem */
+.problem .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:3rem}
+.pcard{background:var(--paper);border-radius:18px;padding:32px;border-top:6px solid var(--navy);box-shadow:0 1px 0 var(--line)}
+.pcard .n{font-family:var(--head);font-size:2.4rem;font-weight:700;color:var(--gold)}
+.pcard h3{font-size:1.3rem;margin:.4rem 0 .5rem}
+.pcard p{color:var(--muted)}
+.waldo{color:var(--gold)}
+@media(max-width:860px){.problem .cards{grid-template-columns:1fr}}
+
+/* fix */
+.fix{background:var(--navy);color:#fff}
+.fix-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.fix ul{list-style:none;margin-top:1.6rem;display:grid;gap:1rem}
+.fix li{display:flex;gap:1rem;align-items:flex-start;font-size:1.2rem;font-family:var(--head);font-weight:600}
+.fix li::before{content:"";flex:0 0 12px;height:12px;margin-top:.5rem;border-radius:50%;background:var(--gold)}
+.fix .tag{margin-top:1.6rem;color:var(--soft)}
+.chat{background:#0b1324;border-radius:28px;padding:22px;max-width:390px;margin-left:auto;box-shadow:0 30px 70px rgba(0,0,0,.35)}
+.chat .t{text-align:center;color:#9aa6bf;font-size:.85rem;font-weight:600;margin-bottom:14px}
+.bub{border-radius:20px;padding:12px 16px;font-size:.98rem;margin-bottom:10px;max-width:85%}
+.bub.me{background:#2f7cf6;margin-left:auto}
+.bub.them{background:#2a3550}
+.linkcard{background:#fff;color:var(--ink);border-radius:16px;overflow:hidden;margin:0 0 10px auto;max-width:85%}
+.linkcard div{padding:10px 14px}
+.linkcard b{font-family:var(--head)}
+.linkcard small{display:block;color:var(--muted)}
+@media(max-width:860px){.fix-grid{grid-template-columns:1fr}.chat{margin:0 auto}}
+
+/* plans */
+.plans .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:3rem;align-items:stretch}
+.plan{background:var(--paper);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--line);transition:transform .25s, box-shadow .25s}
+.plan:hover{transform:translateY(-6px);box-shadow:0 24px 50px rgba(20,33,61,.14)}
+.plan img{aspect-ratio:16/10;object-fit:cover;object-position:top}
+.plan .body{padding:28px;display:flex;flex-direction:column;flex:1}
+.plan .tag{font-size:.75rem;font-weight:700;letter-spacing:.18em;color:var(--muted)}
+.plan h3{font-size:1.9rem;margin:.3rem 0 .2rem}
+.plan .pages{color:var(--muted);font-size:.95rem;margin-bottom:1rem}
+.plan ul{list-style:none;display:grid;gap:.55rem;margin-bottom:1.6rem;flex:1}
+.plan li{padding-left:1.6rem;position:relative;font-size:.97rem}
+.plan li::before{content:"";position:absolute;left:0;top:.45rem;width:.75rem;height:.4rem;border-left:2px solid var(--gold);border-bottom:2px solid var(--gold);transform:rotate(-45deg)}
+.plan .links{display:flex;gap:.6rem;flex-wrap:wrap}
+.plan .links .btn{padding:.7rem 1.2rem;font-size:.92rem}
+.plan .btn.line{border-color:var(--navy);color:var(--navy)}
+.plan.featured{background:var(--navy);color:#fff;border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+.plan.featured .tag{color:var(--gold)}
+.plan.featured .pages{color:var(--soft)}
+.plan.featured .btn.line{border-color:rgba(255,255,255,.4);color:#fff}
+@media(max-width:960px){.plans .grid{grid-template-columns:1fr;max-width:560px;margin-inline:auto}}
+
+/* compare */
+.compare{background:var(--paper)}
+.tbl{margin-top:2.4rem;overflow-x:auto;border-radius:18px;border:1px solid var(--line);background:#fff}
+table{width:100%;border-collapse:collapse;min-width:640px;font-size:.95rem}
+th,td{padding:.8rem 1rem;text-align:center;border-bottom:1px solid #eee8db}
+th:first-child,td:first-child{text-align:left}
+thead th{background:var(--navy);color:#fff;font-family:var(--head);font-size:1.05rem;position:sticky;top:0}
+thead th small{display:block;font-family:var(--body);color:var(--gold);font-size:.75rem;font-weight:600;letter-spacing:.1em}
+tr.grp td{background:var(--cream);font-weight:700;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--navy)}
+td.y{color:var(--gold);font-weight:800;font-size:1.1rem}
+td.n{color:#b9b2a3}
+.more{text-align:center;margin-top:1.4rem}
+.tbl.collapsed tbody tr.extra{display:none}
+
+/* addon */
+.addon-grid{display:grid;grid-template-columns:1fr 1.25fr;gap:56px;align-items:center}
+.addon ul{list-style:none;display:grid;gap:.7rem;margin:1.4rem 0 1.8rem}
+.addon li{padding-left:1.6rem;position:relative}
+.addon li::before{content:"";position:absolute;left:0;top:.6rem;width:8px;height:8px;border-radius:50%;background:var(--gold)}
+.addon .shots{position:relative;padding-right:90px}
+.addon .shots .desk{border-radius:16px;box-shadow:0 30px 60px rgba(20,33,61,.2)}
+.addon .shots .ph{position:absolute;right:0;top:-24px;width:170px;border-radius:24px;border:6px solid #0b0f1c;box-shadow:0 30px 60px rgba(20,33,61,.3)}
+@media(max-width:900px){.addon-grid{grid-template-columns:1fr}.addon .shots{padding-right:60px}.addon .shots .ph{width:110px}}
+
+/* inside elite */
+.elite{background:var(--deep);color:#fff}
+.elite .lead{color:var(--soft)}
+.egrid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:2.6rem}
+.egrid img{border-radius:16px;aspect-ratio:16/9;object-fit:cover;margin-bottom:1rem;border:1px solid #23314f}
+.egrid h3{font-size:1.3rem}
+.egrid p{color:var(--soft)}
+@media(max-width:860px){.egrid{grid-template-columns:1fr}}
+
+/* includes */
+.inc{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:2.6rem}
+.inc div{background:var(--paper);border-radius:18px;padding:26px;border:1px solid var(--line)}
+.inc h3{font-size:1.15rem;margin-bottom:.4rem}
+.inc p{color:var(--muted);font-size:.95rem}
+.inc .hl{background:var(--navy);border-color:var(--navy);color:#fff}
+.inc .hl h3{color:var(--gold)}
+.inc .hl p{color:var(--soft)}
+@media(max-width:960px){.inc{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.inc{grid-template-columns:1fr}}
+
+/* steps */
+.steps-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:60px;align-items:start}
+.steps{list-style:none;border-top:1px solid var(--line);margin-top:1.4rem}
+.steps li{display:flex;gap:1.4rem;padding:1.2rem 0;border-bottom:1px solid var(--line)}
+.steps .n{font-family:var(--head);font-size:1.8rem;font-weight:700;color:var(--gold);min-width:2rem}
+.steps h3{font-size:1.15rem;font-family:var(--body);font-weight:700}
+.steps p{color:var(--muted)}
+.bottom{background:var(--navy);color:#fff;border-radius:22px;padding:38px;position:sticky;top:100px}
+.bottom .big{font-family:var(--head);font-size:1.7rem;font-weight:700;line-height:1.2;margin:.8rem 0 1rem}
+.bottom .big span{color:var(--gold)}
+.bottom p{color:var(--soft)}
+.bottom hr{border:0;border-top:1px solid #2c3d63;margin:1.4rem 0}
+.bottom .last{color:#fff;font-weight:600}
+@media(max-width:900px){.steps-grid{grid-template-columns:1fr}.bottom{position:static}}
+
+/* how */
+.how3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:2.4rem;counter-reset:s}
+.how3 div{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:30px}
+.how3 .n{width:46px;height:46px;border-radius:50%;background:var(--navy);color:var(--gold);display:grid;place-items:center;font-family:var(--head);font-weight:700;font-size:1.2rem;margin-bottom:1rem}
+.how3 h3{font-size:1.25rem;margin-bottom:.3rem}
+.how3 p{color:var(--muted)}
+@media(max-width:860px){.how3{grid-template-columns:1fr}}
+
+/* about */
+.about-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:60px;align-items:center}
+.about img{border-radius:22px;aspect-ratio:4/5;object-fit:cover;background:#fff}
+.about blockquote{border-left:4px solid var(--gold);padding-left:1.2rem;margin:1.6rem 0;font-size:1.1rem}
+.stats{display:flex;gap:2.4rem;flex-wrap:wrap;margin-top:1.6rem}
+.stats b{display:block;font-family:var(--head);font-size:2rem;color:var(--navy)}
+.stats span{color:var(--muted);font-size:.9rem}
+@media(max-width:860px){.about-grid{grid-template-columns:1fr}.about img{max-width:360px}}
+
+/* contact */
+.contact{background:var(--deep);color:#fff}
+.contact-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:60px;align-items:start}
+.contact .lead{color:var(--soft)}
+.contact .direct{margin-top:2rem;display:grid;gap:.6rem}
+.contact .direct a{font-family:var(--head);font-size:1.5rem;font-weight:700;text-decoration:none;color:#fff}
+.contact .direct a:hover{color:var(--gold-2)}
+form{background:#16223f;border:1px solid #24345a;border-radius:22px;padding:32px;display:grid;gap:14px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label{font-size:.8rem;font-weight:600;letter-spacing:.06em;color:#aeb8cd;display:grid;gap:6px}
+input,select,textarea{font:inherit;color:#fff;background:#0e1830;border:1px solid #2b3b62;border-radius:12px;padding:.8rem .9rem;width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-color:transparent}
+textarea{min-height:110px;resize:vertical}
+form .btn{justify-content:center;width:100%}
+.fine{font-size:.8rem;color:#8f9ab3}
+@media(max-width:860px){.contact-grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}}
+
+footer{background:#080f1e;color:#8f9ab3;padding:40px 0;font-size:.88rem}
+footer .f{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center}
+footer a{color:#c9d0de;text-decoration:none}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease, transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){.reveal{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header id="top">
+  <div class="wrap nav">
+    <a class="brand" href="#" aria-label="Herman Technical Solutions home">
+      <svg viewBox="0 0 250 250" aria-hidden="true"><rect width="250" height="250" rx="54" fill="#14213d" stroke="#2c3d63" stroke-width="6"/><g transform="translate(20 62) scale(0.86)" fill="none" stroke="#d4af37" stroke-linecap="round" stroke-linejoin="round"><path d="M72 18 C 71 48 71 82 73 114" stroke-width="7"/><path d="M104 16 C 103 48 103 82 105 114" stroke-width="7"/><path d="M146 40 C 145 66 145 92 147 114" stroke-width="7"/><path d="M58 104 C 38 113 16 108 20 97 C 26 83 56 80 86 68 C 104 60 110 42 126 40 L 178 39 C 204 37 212 18 198 11 C 182 4 168 20 182 37 C 198 56 222 70 212 95 C 204 114 178 120 162 112" stroke-width="6.5"/></g></svg>
+      <span><b>Herman Technical</b><small>SOLUTIONS</small></span>
+    </a>
+    <nav>
+      <a href="#work">Our work</a>
+      <a href="#plans">Plans</a>
+      <a href="#compare">Compare</a>
+      <a href="#how">How it works</a>
+      <a href="#about">About</a>
+      <a class="btn gold" href="#contact">Book a call</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">Real estate web design</p>
+      <h1>Websites that win the lead <em>before the first call.</em></h1>
+      <p class="sub">Built by an agent, for agents. You send the info, I build the site and keep it updated. No tech skills needed.</p>
+      <div class="ctas">
+        <a class="btn gold" href="#work">See the websites</a>
+        <a class="btn ghost" href="#contact">Book a 15-minute call</a>
+      </div>
+      <div class="proof">
+        <div><b>3</b>plans to pick from</div>
+        <div><b>Live</b>demos you can click</div>
+        <div><b>1</b>direct line, no help desk</div>
+      </div>
+    </div>
+    <div class="hero-shots">
+      <div class="browser"><div class="dots"><i></i><i></i><i></i></div><img src="images/elite.jpg" alt="Elite plan website with a mountain video cover"></div>
+      <img class="phone" src="images/listing-phone.jpg" alt="Listing website on a phone">
+    </div>
+  </div>
+</section>
+
+<section class="section work" id="work">
+  <div class="wrap">
+    <p class="eyebrow reveal">Our work</p>
+    <h2 class="reveal">Websites we’ve built. Click any one.</h2>
+    <p class="lead reveal">Every site below is live. Open it on your phone the way your leads would.</p>
+    <div class="wgrid">
+      <a class="wcard reveal" href="https://nolanherman07-commits.github.io/Minimum-website/" target="_blank" rel="noopener"><img src="images/basic.jpg" alt="One-page agent site"><div><small>Agent website · Basic</small><b>One-page agent site</b><span>Open live site →</span></div></a>
+      <a class="wcard reveal" href="https://nolanherman07-commits.github.io/premium-website/" target="_blank" rel="noopener"><img src="images/premium.jpg" alt="Five-page agent site"><div><small>Agent website · Premium</small><b>Five-page agent site</b><span>Open live site →</span></div></a>
+      <a class="wcard reveal" href="https://nolanherman07-commits.github.io/elite-website/" target="_blank" rel="noopener"><img src="images/elite.jpg" alt="Cinematic agent site"><div><small>Agent website · Elite</small><b>Cinematic agent site</b><span>Open live site →</span></div></a>
+      <a class="wcard reveal" href="https://nolanherman07-commits.github.io/listing-website/" target="_blank" rel="noopener"><img src="images/listing-desktop.jpg" alt="4325 Raney Way"><div><small>Listing website</small><b>4325 Raney Way</b><span>Open live site →</span></div></a>
+      <a class="wcard reveal" href="https://nolanherman07-commits.github.io/client-tracker/" target="_blank" rel="noopener"><img src="images/tracker.jpg" alt="Client Tracker"><div><small>Web app</small><b>Client Tracker</b><span>Open live site →</span></div></a>
+    </div>
+  </div>
+</section>
+
+<section class="section problem">
+  <div class="wrap">
+    <p class="eyebrow reveal">The problem</p>
+    <h2 class="reveal">You get the lead. They look you up. Then it’s <span class="waldo">where’s Waldo?</span></h2>
+    <div class="cards">
+      <div class="pcard reveal"><div class="n">01</div><h3>Every profile looks the same</h3><p>A Zillow profile puts you next to every other agent in town.</p></div>
+      <div class="pcard reveal"><div class="n">02</div><h3>Just a random person</h3><p>To a new lead, you’re just a name and a phone number. They have no reason to pick you.</p></div>
+      <div class="pcard reveal"><div class="n">03</div><h3>The lead goes cold</h3><p>You blend in with the other 100,000 real estate agents in NC, so they move on.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section fix">
+  <div class="wrap fix-grid">
+    <div>
+      <p class="eyebrow reveal">The fix</p>
+      <h2 class="reveal">A branded website you text to buyers and sellers.</h2>
+      <ul>
+        <li class="reveal">They know you before you meet.</li>
+        <li class="reveal">They trust you before you meet.</li>
+        <li class="reveal">Sellers see your results before you walk in.</li>
+      </ul>
+      <p class="tag reveal">It isn’t about being found on Google. It’s what you send.</p>
+    </div>
+    <div class="chat reveal" aria-label="Example text message conversation">
+      <p class="t">New lead · Today 2:14 PM</p>
+      <div class="bub me">Great talking with you! Here’s a little about me before we meet:</div>
+      <div class="linkcard"><img src="images/premium.jpg" alt="Link preview of an agent website"><div><b>Nolan, REALTOR®</b><small>your-name-realty.com</small></div></div>
+      <div class="bub them">Wow, love this. See you Saturday!</div>
+    </div>
+  </div>
+</section>
+
+<section class="section plans" id="plans">
+  <div class="wrap">
+    <p class="eyebrow reveal">Three levels</p>
+    <h2 class="reveal">Pick the site that fits your business.</h2>
+    <p class="lead reveal">Every plan is a real, live website. Click through the demos and see exactly what you get.</p>
+    <div class="grid">
+      <article class="plan reveal">
+        <img src="images/basic.jpg" alt="Basic plan one-page website">
+        <div class="body">
+          <p class="tag">STARTER</p>
+          <h3>Basic</h3>
+          <p class="pages">One clean page: who you are, your numbers, your reviews.</p>
+          <ul>
+            <li>One-page site that loads fast on any phone</li>
+            <li>Your photo, bio and sales numbers</li>
+            <li>Client reviews and social links</li>
+            <li>Call, text and email buttons</li>
+            <li>Three design styles to choose from</li>
+          </ul>
+          <div class="links"><a class="btn line" href="https://nolanherman07-commits.github.io/Minimum-website/" target="_blank" rel="noopener">View live site →</a></div>
+        </div>
+      </article>
+      <article class="plan featured reveal">
+        <img src="images/premium.jpg" alt="Premium plan website home page">
+        <div class="body">
+          <p class="tag">RECOMMENDED</p>
+          <h3>Premium</h3>
+          <p class="pages">Five pages. Great for buyers and sellers, and for most agents.</p>
+          <ul>
+            <li>Home, About, Buy, Sell and Contact pages</li>
+            <li>Featured and sold listings</li>
+            <li>Review slider and on-the-job photos</li>
+            <li>“What’s my home worth?” form for seller leads</li>
+            <li>Mortgage calculator and buyer steps</li>
+          </ul>
+          <div class="links"><a class="btn gold" href="https://nolanherman07-commits.github.io/premium-website/" target="_blank" rel="noopener">View live site →</a></div>
+        </div>
+      </article>
+      <article class="plan reveal">
+        <img src="images/elite.jpg" alt="Elite plan cinematic website">
+        <div class="body">
+          <p class="tag">LIMITED SPOTS</p>
+          <h3>Elite</h3>
+          <p class="pages">A cinematic website for the top producers in each market.</p>
+          <ul>
+            <li>Cinematic drone and video backgrounds</li>
+            <li>Town and area pages for the places you serve</li>
+            <li>Listings page with featured and sold homes</li>
+            <li>Buyer and listing résumés, plus buyer and seller guides (PDF)</li>
+            <li>Home value and book-a-call forms</li>
+          </ul>
+          <div class="links"><a class="btn line" href="https://nolanherman07-commits.github.io/elite-website/" target="_blank" rel="noopener">View live site →</a></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section compare" id="compare">
+  <div class="wrap">
+    <p class="eyebrow reveal">Side by side</p>
+    <h2 class="reveal">Compare every feature.</h2>
+    <div class="tbl collapsed reveal" id="tbl">
+      <table>
+        <thead><tr><th>Feature</th><th>Basic<small>1 PAGE</small></th><th>Premium<small>5 PAGES</small></th><th>Elite<small>CINEMATIC</small></th></tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="4">Design</td></tr>
+          <tr><td>Phone-friendly on every screen</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr><td>Your logo, colors and photos</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr><td>Moving cover</td><td>Still photo</td><td>Slideshow</td><td>Video</td></tr>
+          <tr class="extra"><td>Drone and video background loops</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td></tr>
+          <tr class="extra"><td>Frosted-glass menus and cards</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td></tr>
+          <tr class="extra"><td>Count-up stats and scrolling town banner</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td></tr>
+          <tr class="grp"><td colspan="4">Pages</td></tr>
+          <tr><td>Home</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr><td>About: story, timeline, photo gallery</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr class="extra"><td>Buy: steps and payment calculator</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr class="extra"><td>Sell: selling plan and seller stats</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr class="extra"><td>Contact page</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr><td>Listings page: featured and sold</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td></tr>
+          <tr><td>Town and area pages</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td></tr>
+          <tr class="grp"><td colspan="4">Selling you</td></tr>
+          <tr><td>Stats bar, bio and headshot</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr><td>Client reviews</td><td>3</td><td>Slider</td><td>Rotating strip</td></tr>
+          <tr class="extra"><td>Zillow and Homes.com profile links</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr class="extra"><td>Social media links and YouTube video</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr class="extra"><td>Featured listings with details</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr class="extra"><td>Buyer and listing résumés (PDF)</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td></tr>
+          <tr class="grp"><td colspan="4">Lead tools</td></tr>
+          <tr><td>Call, text and email buttons</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr><td>Contact form sent to your email</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr><td>“What’s my home worth?” form</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr class="extra"><td>Monthly payment calculator</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr class="extra"><td>Buyer and seller guides (PDF)</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td></tr>
+          <tr class="extra"><td>Book-a-call form</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td></tr>
+          <tr class="grp"><td colspan="4">Every plan</td></tr>
+          <tr><td>Hosting and monthly updates</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr><td>Direct line to Nolan</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="more"><button class="btn navy" id="moreBtn" type="button">Show every feature</button></div>
+  </div>
+</section>
+
+<section class="section addon">
+  <div class="wrap addon-grid">
+    <div>
+      <p class="eyebrow reveal">Add-on · any level</p>
+      <h2 class="reveal">Listing websites.</h2>
+      <ul>
+        <li class="reveal">Its own site for every listing</li>
+        <li class="reveal">Drone video header and photo gallery</li>
+        <li class="reveal">Price, beds, baths and seller credits up front</li>
+        <li class="reveal">Schedule a showing, call, text and Zillow buttons</li>
+        <li class="reveal">One-tap share for sellers to post</li>
+      </ul>
+      <a class="btn navy reveal" href="https://nolanherman07-commits.github.io/listing-website/" target="_blank" rel="noopener">View a live listing site →</a>
+    </div>
+    <div class="shots reveal">
+      <img class="desk" src="images/listing-desktop.jpg" alt="Listing website for 4325 Raney Way on a computer">
+      <img class="ph" src="images/listing-phone.jpg" alt="Listing website for 4325 Raney Way on a phone">
+    </div>
+  </div>
+</section>
+
+<section class="section elite">
+  <div class="wrap">
+    <p class="eyebrow reveal">Inside Elite</p>
+    <h2 class="reveal">The local expert, on every page.</h2>
+    <p class="lead reveal">Elite turns your site into the place buyers go to learn your market.</p>
+    <div class="egrid">
+      <div class="reveal"><img src="images/relocation.jpg" alt="Relocation page"><h3>Relocation hub</h3><p>Compare towns, drive times and prices.</p></div>
+      <div class="reveal"><img src="images/market.jpg" alt="Market update page"><h3>Market updates</h3><p>Prices, days on market and supply.</p></div>
+      <div class="reveal"><img src="images/area.jpg" alt="Living in Hickory area page"><h3>Area guides</h3><p>A page for every town you serve.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <p class="eyebrow reveal">Every level includes</p>
+    <h2 class="reveal">You send the info. I build the site.</h2>
+    <div class="inc">
+      <div class="reveal"><h3>Done for you</h3><p>Your photos, reviews, stats and listings, set up for you.</p></div>
+      <div class="reveal"><h3>Built for phones</h3><p>Looks right on the phone your lead opens it on.</p></div>
+      <div class="reveal"><h3>Updates handled</h3><p>New listing or closing? Text me and it goes up.</p></div>
+      <div class="reveal hl"><h3>Price lock guarantee</h3><p>Your monthly rate never goes up while you stay.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background:var(--paper)">
+  <div class="wrap steps-grid">
+    <div>
+      <p class="eyebrow reveal">How you use it</p>
+      <h2 class="reveal">Send it everywhere you follow up.</h2>
+      <ol class="steps">
+        <li class="reveal"><span class="n">1</span><div><h3>After every lead call</h3><p>Text the link right after you hang up.</p></div></li>
+        <li class="reveal"><span class="n">2</span><div><h3>Referrals from your sphere</h3><p>Friends forward one link instead of explaining you.</p></div></li>
+        <li class="reveal"><span class="n">3</span><div><h3>Email signature</h3><p>Every message points back to you.</p></div></li>
+        <li class="reveal"><span class="n">4</span><div><h3>Before listing appointments</h3><p>Sellers see your results before you walk in.</p></div></li>
+      </ol>
+    </div>
+    <aside class="bottom reveal">
+      <p class="eyebrow">Honest expectations</p>
+      <p class="big">The site gets you in the game. <span>Your effort keeps you on page one.</span></p>
+      <p>Google rewards agents who keep their site active: a Google Business Profile, reviews after every closing, new listings and market updates, and the words buyers search for.</p>
+      <hr>
+      <p class="last">You bring the content. Text it to me and I’ll put it up.</p>
+    </aside>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <div class="wrap">
+    <p class="eyebrow reveal">How it works</p>
+    <h2 class="reveal">Live in three steps.</h2>
+    <div class="how3">
+      <div class="reveal"><span class="n">1</span><h3>Pick a plan</h3><p>Look at the live demos and choose.</p></div>
+      <div class="reveal"><span class="n">2</span><h3>Send your info</h3><p>Headshot, bio, stats, reviews and links.</p></div>
+      <div class="reveal"><span class="n">3</span><h3>Go live</h3><p>I build it, you approve it, and I keep it updated.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section about" id="about" style="background:var(--paper)">
+  <div class="wrap about-grid">
+    <img class="reveal" src="images/nolan.jpg" alt="Nolan Herman">
+    <div>
+      <p class="eyebrow reveal">Built by an agent</p>
+      <h2 class="reveal">Hi, I’m Nolan Herman.</h2>
+      <p class="lead reveal">I’m a REALTOR® with Nestlewood Realty in Hickory, NC. I built my own websites to win my own leads, and now I build them for other agents. I know what a buyer or seller looks for when they look you up, because I’m on the same calls you are.</p>
+      <blockquote class="reveal">On our call, I’ll walk you step by step through the exact design of your website, so you get business where you want to work.</blockquote>
+      <div class="stats reveal">
+        <div><b>$10M+</b><span>in my own sales</span></div>
+        <div><b>$8M+</b><span>sold in 2026</span></div>
+        <div><b>100%</b><span>of my listings sold</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section contact" id="contact">
+  <div class="wrap contact-grid">
+    <div>
+      <p class="eyebrow reveal">Next step</p>
+      <h2 class="reveal">Let’s build yours.</h2>
+      <p class="lead reveal">Book a 15-minute call this week. I’ll show you which level fits and how fast it can go live.</p>
+      <div class="direct reveal">
+        <a href="tel:+18284045335">828-404-5335</a>
+        <a href="sms:+18284045335" style="font-size:1rem;font-family:var(--body);font-weight:600;color:var(--gold)">Or text me →</a>
+      </div>
+    </div>
+    <form id="leadForm" class="reveal" novalidate>
+      <div class="row">
+        <label>Name<input name="name" required autocomplete="name"></label>
+        <label>Phone<input name="phone" type="tel" required autocomplete="tel"></label>
+      </div>
+      <div class="row">
+        <label>Email<input name="email" type="email" autocomplete="email"></label>
+        <label>Brokerage<input name="brokerage"></label>
+      </div>
+      <label>Plan you’re interested in
+        <select name="plan">
+          <option>Not sure yet</option><option>Basic</option><option>Premium</option><option>Elite</option><option>Listing website add-on</option>
+        </select>
+      </label>
+      <label>Best time for a call, or anything else<textarea name="message"></textarea></label>
+      <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
+      <button class="btn gold" type="submit">Book my 15-minute call</button>
+      <p class="fine" id="formNote">Goes straight to Nolan. No spam, no help desk.</p>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap f">
+    <span>© <span id="yr"></span> Herman Technical Solutions · Hickory, NC</span>
+    <span><a href="tel:+18284045335">828-404-5335</a></span>
+  </div>
+</footer>
+
+<script>
+// Leads go to this email through FormSubmit (formsubmit.co). The first message
+// sends an "Activate form" email to this address; click it once.
+const LEAD_EMAIL = "nolan@nestlewoodrealty.com";
+const FORM_ENDPOINT = "https://formsubmit.co/ajax/" + LEAD_EMAIL;
+
+document.getElementById("yr").textContent = new Date().getFullYear();
+
+const header = document.getElementById("top");
+const onScroll = () => header.classList.toggle("scrolled", scrollY > 30);
+addEventListener("scroll", onScroll, { passive: true }); onScroll();
+
+const io = new IntersectionObserver((es) => es.forEach((e) => {
+  if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+}), { threshold: 0.12 });
+document.querySelectorAll(".reveal").forEach((el, i) => { el.style.transitionDelay = (i % 4) * 70 + "ms"; io.observe(el); });
+
+const tbl = document.getElementById("tbl"), moreBtn = document.getElementById("moreBtn");
+moreBtn.addEventListener("click", () => {
+  const c = tbl.classList.toggle("collapsed");
+  moreBtn.textContent = c ? "Show every feature" : "Show fewer";
+});
+
+const form = document.getElementById("leadForm"), note = document.getElementById("formNote");
+form.addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  if (!form.name.value.trim() || !form.phone.value.trim()) { note.textContent = "Please add your name and phone number."; return; }
+  if (form._honey.value) return;
+  const btn = form.querySelector("button"); const label = btn.textContent;
+  btn.disabled = true; btn.textContent = "Sending…";
+  const data = Object.fromEntries(new FormData(form));
+  delete data._honey;
+  try {
+    const r = await fetch(FORM_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ ...data, _subject: "HTS website lead: " + data.name, _template: "table", _captcha: "false" }),
+    });
+    const res = await r.json().catch(() => ({}));
+    if (!r.ok || String(res.success) !== "true") throw new Error(res.message || "not delivered");
+    form.reset(); btn.textContent = "Sent! Nolan will be in touch.";
+    note.textContent = "Thanks! Expect a call or text soon.";
+  } catch (e) {
+    btn.textContent = label; btn.disabled = false;
+    note.innerHTML = 'Couldn’t send. Call or text <a href="tel:+18284045335" style="color:#e0bd4a">828-404-5335</a>.';
+  }
+});
+</script>
+</body>
+</html>
