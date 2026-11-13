@@ -464,3 +464,7 @@ html.lenis.lenis-stopped{overflow:hidden}
 .track.single .shot{width:min(980px,66vw,calc((100vh - 330px) * 1.6))}
 .track.single ~ .wrap .work-bar{display:none}
 @media(max-width:899px){.track.single .shot{width:100%}}
+
+/* let the star field show through the content sections a little more */
+.problem,.plans,.how,.contact,.guide,.addon,.elite{background:rgba(22,23,25,.78)}
+.fix,.includes,.usage,.about,.consult{background:rgba(28,28,31,.82)}

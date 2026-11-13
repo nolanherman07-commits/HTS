@@ -3,7 +3,7 @@
 // Then (setGrid 0..1, driven by the "warp" section) the cubes fly back, lock into a
 // wall of tiles that fills the screen, a gold flip ripples across it, and the tiles
 // burst forward past the camera as the next section rises.
-import { Color, ACESFilmicToneMapping, AmbientLight, BoxGeometry, CatmullRomCurve3, Clock, DirectionalLight, DynamicDrawUsage, Euler, Group, InstancedMesh, MeshStandardMaterial, Object3D, PMREMGenerator, PerspectiveCamera, Quaternion, Scene, TorusGeometry, Vector3, WebGLRenderer } from "three";
+import { BufferAttribute, BufferGeometry, Points, PointsMaterial, AdditiveBlending, CanvasTexture, Color, ACESFilmicToneMapping, AmbientLight, BoxGeometry, CatmullRomCurve3, Clock, DirectionalLight, DynamicDrawUsage, Euler, Group, InstancedMesh, MeshStandardMaterial, Object3D, PMREMGenerator, PerspectiveCamera, Quaternion, Scene, TorusGeometry, Vector3, WebGLRenderer } from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 
 export function startScene(canvas, opts = {}) {
@@ -107,6 +107,42 @@ export function startScene(canvas, opts = {}) {
       c.center = Math.min(1, Math.hypot(c.grid.x / (w / 2), c.grid.y / (h / 2)) / 1.2);
     });
   }
+
+  // ---- moving star field behind everything ----
+  const STARS = mobile ? 700 : 1600;
+  const starGeo = new BufferGeometry();
+  const sp0 = new Float32Array(STARS * 3), sc = new Float32Array(STARS * 3);
+  const starSpeed = new Float32Array(STARS);
+  const palette = [new Color(0xffffff), new Color(0xffe6a8), new Color(0x9cc3ff), new Color(0xfff4dc)];
+  for (let i = 0; i < STARS; i++) {
+    sp0[i * 3] = rand(-38, 38); sp0[i * 3 + 1] = rand(-24, 24); sp0[i * 3 + 2] = rand(-40, -6);
+    const c = palette[(Math.random() * palette.length) | 0];
+    sc[i * 3] = c.r; sc[i * 3 + 1] = c.g; sc[i * 3 + 2] = c.b;
+    starSpeed[i] = rand(0.15, 0.9);
+  }
+  starGeo.setAttribute("position", new BufferAttribute(sp0, 3));
+  starGeo.setAttribute("color", new BufferAttribute(sc, 3));
+  // soft round dot texture so stars glow instead of showing as squares
+  const dot = document.createElement("canvas"); dot.width = dot.height = 64;
+  const g2 = dot.getContext("2d"), grad = g2.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grad.addColorStop(0, "rgba(255,255,255,1)"); grad.addColorStop(0.25, "rgba(255,255,255,.75)"); grad.addColorStop(1, "rgba(255,255,255,0)");
+  g2.fillStyle = grad; g2.fillRect(0, 0, 64, 64);
+  const starMat = new PointsMaterial({ size: mobile ? 0.42 : 0.36, map: new CanvasTexture(dot), vertexColors: true, transparent: true,
+    opacity: 1, depthWrite: false, blending: AdditiveBlending, sizeAttenuation: true });
+  const stars = new Points(starGeo, starMat);
+  let lastStarT = 0;
+  // a few big bright stars that twinkle
+  const BIG = mobile ? 50 : 110;
+  const bigGeo = new BufferGeometry(), bp = new Float32Array(BIG * 3), bc = new Float32Array(BIG * 3);
+  for (let i = 0; i < BIG; i++) {
+    bp[i * 3] = rand(-36, 36); bp[i * 3 + 1] = rand(-22, 22); bp[i * 3 + 2] = rand(-30, -8);
+    const c = palette[(Math.random() * palette.length) | 0]; bc[i * 3] = c.r; bc[i * 3 + 1] = c.g; bc[i * 3 + 2] = c.b;
+  }
+  bigGeo.setAttribute("position", new BufferAttribute(bp, 3)); bigGeo.setAttribute("color", new BufferAttribute(bc, 3));
+  const bigMat = starMat.clone(); bigMat.size = mobile ? 1.0 : 0.85;
+  const bigStars = new Points(bigGeo, bigMat);
+  stars.add(bigStars);
+  scene.add(stars);
 
   // ---- gold chain ----
   const LINKS = mobile ? 34 : 54;
@@ -230,6 +266,20 @@ export function startScene(canvas, opts = {}) {
     }
     chain.instanceMatrix.needsUpdate = true;
 
+    if (!reduced) {
+      const pos = starGeo.attributes.position.array, dt = Math.min(0.05, Math.max(0, t - lastStarT)); lastStarT = t;
+      for (let i = 0; i < STARS; i++) {
+        pos[i * 3] -= starSpeed[i] * dt * 1.2;
+        pos[i * 3 + 1] += starSpeed[i] * dt * 0.25;
+        if (pos[i * 3] < -40) pos[i * 3] = 40;
+        if (pos[i * 3 + 1] > 26) pos[i * 3 + 1] = -26;
+      }
+      starGeo.attributes.position.needsUpdate = true;
+      starMat.opacity = 0.85 + Math.sin(t * 1.3) * 0.1;
+      bigMat.opacity = 0.55 + Math.sin(t * 2.4) * 0.35;
+    }
+    stars.position.set(-sx * 1.2, sy * 0.8 + sp * 3, 0);
+    stars.rotation.z = t * 0.006;
     camera.position.x = sx * 0.6;
     camera.position.y = -sy * 0.4;
     camera.lookAt(0, 0, 0);
