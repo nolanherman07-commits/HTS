@@ -384,3 +384,8 @@ form{position:relative}
 @media(max-width:520px){.foot-cols{grid-template-columns:1fr}}
 .btn{white-space:nowrap}
 @media(max-width:520px){.brand b{font-size:.82rem}.brand small{font-size:.55rem}.brand svg{width:46px}.nav nav .btn{padding:.6rem .95rem;font-size:.82rem}}
+/* tap targets: at least 44px tall (UI UX Pro Max, touch & interaction) */
+.brand,.nav nav .btn{min-height:44px}
+.text-link,.phone-big{display:inline-flex;align-items:center;min-height:44px;width:fit-content}
+.direct{gap:0}
+@media (hover:none){.foot-cols a,.mobile-menu p a{display:inline-flex;align-items:center;min-height:44px}}

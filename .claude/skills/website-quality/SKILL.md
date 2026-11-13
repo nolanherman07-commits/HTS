@@ -44,8 +44,13 @@ Motion rules:
 - Every animation has a `prefers-reduced-motion` fallback that shows the final state.
 - Motion should mean something: arrival, feedback, progress. Not decoration.
 
-Optional extras the owner can install on their own machine (they need approval or a personal API key, so don't install them silently):
-- **UI UX Pro Max** skill (styles, palettes, font pairings, UX rules): https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+**UI UX Pro Max** is installed next to this skill (`.claude/skills/ui-ux-pro-max`, MIT, from https://github.com/nextlevelbuilder/ui-ux-pro-max-skill).
+Use it for design decisions and reviews, for example:
+`python3 .claude/skills/ui-ux-pro-max/scripts/search.py "real estate agent website" --design-system`
+or one concern at a time: `--domain ux`, `--domain typography`, `--domain color`, `--domain gsap`.
+Its palette suggestions never override a brand: HTS stays navy and gold, client sites keep the client's colors.
+
+Optional extra the owner sets up with their own key (don't install silently):
 - **21st.dev Magic MCP** (component generator, needs a 21st.dev API key): `claude mcp add magic --scope user --env API_KEY="<key>" -- npx -y @21st-dev/magic@latest`
 
 ## 2. Launch checklist (functional)
