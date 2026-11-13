@@ -180,20 +180,66 @@ if (reduced) {
     .to(".warp-line.l2", { opacity: 0, scale: 1.25, filter: "blur(10px)", duration: 0.06 }, 0.72)
     .set({}, {}, 1);
 
-  // work: pin the section and slide the sites sideways on desktop
+  // work: pin the section, slide the sites sideways, then fly into the last screen (Elite),
+  // the picture turns into a grid of squares, and a notched panel rises with "the problem"
   ScrollTrigger.matchMedia({
     "(min-width: 900px)": () => {
-      const track = $("#track");
+      root.classList.add("zoomfx");
+      const track = $("#track"), pin = $(".work-pin"), zoom = $(".zoom"), last = $$(".shot", track).pop();
+      const lastImg = $(".frame img", last);
       const dist = () => Math.max(0, track.scrollWidth - innerWidth + 80);
-      const tween = gsap.to(track, {
-        x: () => -dist(), ease: "none",
+      // where the Elite screenshot sits once the gallery has finished sliding
+      const endRect = () => {
+        const prev = gsap.getProperty(track, "x");
+        gsap.set(track, { x: -dist() });
+        const r = lastImg.getBoundingClientRect(), p = pin.getBoundingClientRect();
+        gsap.set(track, { x: prev });
+        return { left: r.left - p.left, top: r.top - p.top, width: r.width, height: r.height };
+      };
+      let er = null;
+      const rect = (k) => () => (er || (er = endRect()))[k];
+      ScrollTrigger.addEventListener("refreshInit", () => { er = null; });
+      // headline words for the panel
+      const head = $(".zhead");
+      if (!head.dataset.done) {
+        head.dataset.done = 1;
+        head.innerHTML = head.innerHTML.split(/(<em>.*?<\/em>|\s+)/).filter((w) => w && w.trim())
+          .map((w) => w.startsWith("<em>") ? `<em>${w.slice(4, -5).split(" ").map((x) => `<span class="zw">${x}</span>`).join(" ")}</em>` : `<span class="zw">${w}</span>`).join(" ");
+      }
+      const D_SLIDE = 1, VH = innerHeight / Math.max(1, dist());
+      const D_ZOOM = 1.0 * VH, D_PUSH = 0.35 * VH, D_GRID = 0.6 * VH, D_PANEL = 0.7 * VH, D_TAIL = 0.6 * VH;
+      const total = D_SLIDE + D_ZOOM + D_PUSH + D_GRID + D_PANEL + D_TAIL;
+      const tl = gsap.timeline({
+        defaults: { ease: "none" },
         scrollTrigger: {
-          trigger: "#work", pin: ".work-pin", start: "top top", end: () => "+=" + dist(),
+          trigger: "#work", pin: ".work-pin", start: "top top",
+          end: () => "+=" + (dist() + innerHeight * (1.0 + 0.35 + 0.6 + 0.7 + 0.6)),
           scrub: 0.6, invalidateOnRefresh: true,
-          onUpdate: (st) => gsap.set("#workBar", { scaleX: st.progress }),
+          onUpdate: (st) => gsap.set("#workBar", { scaleX: Math.min(1, (st.progress * total) / D_SLIDE) }),
         },
       });
-      return () => tween.kill();
+      let t = 0;
+      tl.to(track, { x: () => -dist(), duration: D_SLIDE }, t);
+      t += D_SLIDE;
+      // fly into the Elite screen
+      tl.set(zoom, { visibility: "visible" }, t)
+        .fromTo(zoom, { left: rect("left"), top: rect("top"), width: rect("width"), height: rect("height"), borderRadius: 6 },
+          { left: 0, top: 0, width: () => pin.offsetWidth, height: () => pin.offsetHeight, borderRadius: 0, ease: "power2.inOut", duration: D_ZOOM, immediateRender: false }, t)
+        .to([".work-head", ".work-bar"], { autoAlpha: 0, duration: D_ZOOM * 0.4 }, t);
+      t += D_ZOOM;
+      // keep pushing in
+      tl.fromTo(".zoom img", { scale: 1 }, { scale: 1.18, ease: "power1.in", duration: D_PUSH + D_GRID * 0.6, immediateRender: false }, t);
+      t += D_PUSH;
+      // the picture turns into a grid of squares
+      tl.to(".zgrid i", { opacity: 1, duration: D_GRID * 0.5, stagger: { grid: [7, 12], from: "center", amount: D_GRID * 0.5 } }, t);
+      t += D_GRID;
+      // notched panel rises, the headline blurs in
+      tl.set(".zpanel", { visibility: "visible" }, t)
+        .fromTo(".zpanel", { yPercent: 100 }, { yPercent: 0, ease: "power2.out", duration: D_PANEL * 0.55, immediateRender: false }, t)
+        .to(".zhead .zw", { opacity: 1, filter: "blur(0px)", duration: D_PANEL * 0.25, stagger: D_PANEL * 0.03 }, t + D_PANEL * 0.35);
+      t += D_PANEL;
+      tl.set({}, {}, t + D_TAIL);
+      return () => { root.classList.remove("zoomfx"); tl.kill(); };
     },
   });
 

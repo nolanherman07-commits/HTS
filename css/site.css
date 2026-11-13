@@ -435,3 +435,21 @@ h1 em{text-shadow:0 0 40px rgba(242,210,122,.35)}
 .no-webgl .warp-line.l2 span{color:var(--gold-2)}
 html.lenis.lenis-stopped{overflow:hidden}
 @media (prefers-reduced-motion: reduce){.warp-hint i{animation:none}}
+
+/* ===== zoom into the Elite site, grid of squares, panel into "the problem" ===== */
+.zoom,.zgrid,.zpanel{display:none}
+.zoomfx .zoom{display:block;position:absolute;z-index:5;overflow:hidden;visibility:hidden;border-radius:6px;box-shadow:0 0 0 1px var(--line),0 0 120px rgba(61,139,255,.25)}
+.zoomfx .zoom img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.zoomfx .zgrid{display:grid;position:absolute;inset:0;z-index:6;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(7,1fr);pointer-events:none}
+.zgrid i{background:var(--panel-base);border:1px solid rgba(61,139,255,.18);opacity:0}
+.zoomfx .zpanel{display:block;position:absolute;inset:0;z-index:7;background:var(--panel-base);visibility:hidden;
+  clip-path:polygon(0 64px,36% 64px,39.5% 0,60.5% 0,64% 64px,100% 64px,100% 100%,0 100%)}
+.zpanel::before{content:"";position:absolute;left:0;right:0;top:0;height:70px;background:var(--gold);opacity:.65;
+  clip-path:polygon(0 64px,36% 64px,39.5% 0,60.5% 0,64% 64px,100% 64px,100% 65.5px,64% 65.5px,60.5% 1.5px,39.5% 1.5px,36% 65.5px,0 65.5px)}
+.zpanel .wrap{padding-top:clamp(120px,17vh,170px)}
+.zpanel h2.big{font-size:clamp(2.4rem,5.6vw,5rem);max-width:16ch;margin:1.1rem 0 0}
+.zpanel h2 .zw{display:inline-block;opacity:0;filter:blur(14px)}
+/* the problem section continues right under the panel */
+.zoomfx .problem{background:var(--panel-base);position:relative;z-index:4;margin-top:-50vh;padding-top:0}
+.zoomfx .problem-head{display:none}
+.zoomfx .problem .cards3{margin-top:0}
