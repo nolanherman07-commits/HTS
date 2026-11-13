@@ -15,22 +15,91 @@ let scene = null;
 try { scene = startScene($("#bg"), { reduced }); } catch (e) { scene = null; }
 if (!scene) root.classList.add("no-webgl");
 
-// ---- intro: logo draws, screen splits, cubes assemble ----
+// ---- intro: a brick wall the visitor knocks down ----
+const intro = $("#intro"), wall = $("#wall");
+const bricks = [];
+function buildWall() {
+  wall.innerHTML = "";
+  bricks.length = 0;
+  const W = innerWidth, H = innerHeight;
+  const bw = W < 600 ? 74 : W < 1100 ? 104 : 128, bh = Math.round(bw * 0.42), gap = 4;
+  const rows = Math.ceil(H / (bh + gap)) + 1;
+  const shades = ["#c9a98a", "#b88f70", "#d6bc9c", "#a97f62", "#cdb294", "#bf9c7e", "#c7a383", "#b38a6c"];
+  const frag = document.createDocumentFragment();
+  for (let r = 0; r < rows; r++) {
+    const off = r % 2 ? -bw / 2 : 0;
+    for (let x = off; x < W; x += bw + gap) {
+      const el = document.createElement("div");
+      el.className = "brick";
+      const y = r * (bh + gap);
+      el.style.cssText = `left:${x}px;top:${y}px;width:${bw}px;height:${bh}px;--bc:${(() => { const q = Math.random(); return q < 0.05 ? "#e7a3b3" : q < 0.1 ? "#93ab8f" : shades[(Math.random() * shades.length) | 0]; })()}`;
+      frag.appendChild(el);
+      bricks.push({ el, cx: x + bw / 2, cy: y + bh / 2 });
+    }
+  }
+  wall.appendChild(frag);
+}
+
+let opened = false;
 function finishIntro() {
   root.classList.add("opened");
   scene && scene.assemble();
-  setTimeout(() => { root.classList.add("intro-done"); }, 1400);
 }
-const seen = sessionStorage.getItem("hts-intro");
-if (reduced || seen) {
-  root.classList.add("skip-intro");
-  finishIntro();
-} else {
-  sessionStorage.setItem("hts-intro", "1");
-  root.classList.add("intro-run");
-  setTimeout(finishIntro, 2500);
-  $("#intro").addEventListener("click", finishIntro, { once: true });
+function knockDown(px, py) {
+  if (opened) return;
+  opened = true;
+  scrollTo(0, 0);
+  if (reduced) {
+    intro.style.transition = "opacity .5s";
+    intro.style.opacity = "0";
+    finishIntro();
+    setTimeout(() => root.classList.add("intro-done"), 600);
+    return;
+  }
+  intro.classList.add("shake");
+  const H = innerHeight;
+  // every brick gets blasted away from where the wall was hit, then falls
+  bricks.forEach((b) => {
+    const dx = b.cx - px, dy = b.cy - py;
+    const d = Math.hypot(dx, dy) || 1;
+    const force = Math.max(0, 1 - d / (Math.max(innerWidth, H) * 1.1));
+    b.vx = (dx / d) * (6 + 22 * force) + (Math.random() - 0.5) * 6;
+    b.vy = (dy / d) * (4 + 16 * force) - (8 + 10 * force) * Math.random();
+    b.vr = (Math.random() - 0.5) * (14 + 30 * force);
+    b.vz = 0.004 + Math.random() * 0.01;
+    b.x = 0; b.y = 0; b.r = 0; b.s = 1;
+    b.delay = Math.floor(d / 38); // ripple outward from the hit
+  });
+  let frame = 0;
+  setTimeout(finishIntro, 260);
+  const step = () => {
+    frame++;
+    let alive = 0;
+    for (const b of bricks) {
+      if (frame < b.delay) { alive++; continue; }
+      b.vy += 0.9;
+      b.x += b.vx; b.y += b.vy; b.r += b.vr; b.s = Math.max(0.4, b.s - b.vz);
+      if (b.cy + b.y < H + 200) alive++;
+      b.el.style.transform = `translate3d(${b.x}px,${b.y}px,0) rotate(${b.r}deg) scale(${b.s})`;
+    }
+    if (alive && frame < 160) requestAnimationFrame(step);
+    else root.classList.add("intro-done");
+  };
+  requestAnimationFrame(step);
 }
+
+buildWall();
+root.classList.add("intro-run");
+let resizeT;
+addEventListener("resize", () => { if (opened) return; clearTimeout(resizeT); resizeT = setTimeout(buildWall, 150); });
+intro.addEventListener("click", (e) => knockDown(e.clientX || innerWidth / 2, e.clientY || innerHeight / 2));
+$("#knock").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  knockDown(e.clientX || r.left + r.width / 2, e.clientY || r.top + r.height / 2);
+});
+addEventListener("keydown", (e) => { if (!opened && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); knockDown(innerWidth / 2, innerHeight / 2); } });
+$("#knock").focus({ preventScroll: true });
 
 // ---- header ----
 const header = $("#top");
@@ -133,11 +202,7 @@ if (matchMedia("(hover: hover)").matches && !reduced) {
 }
 
 // ---- compare table ----
-const tbl = $("#tbl"), moreBtn = $("#moreBtn");
-moreBtn.addEventListener("click", () => {
-  const c = tbl.classList.toggle("collapsed");
-  moreBtn.textContent = c ? "Show every feature" : "Show fewer";
-});
+
 
 // ---- form ----
 const form = $("#leadForm"), note = $("#formNote");

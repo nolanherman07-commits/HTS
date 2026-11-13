@@ -25,9 +25,9 @@ export function startScene(canvas, opts = {}) {
   const camera = new PerspectiveCamera(mobile ? 50 : 38, innerWidth / innerHeight, 0.1, 100);
   camera.position.set(0, 0, 14);
 
-  const key = new DirectionalLight(0xffe3a3, 2.2); key.position.set(5, 6, 8); scene.add(key);
-  const rim = new DirectionalLight(0x5b7cff, 1.6); rim.position.set(-6, -2, -4); scene.add(rim);
-  scene.add(new AmbientLight(0x22305a, 0.6));
+  const key = new DirectionalLight(0xfff1e0, 2.0); key.position.set(5, 6, 8); scene.add(key);
+  const rim = new DirectionalLight(0xf2b8c5, 1.2); rim.position.set(-6, -2, -4); scene.add(rim);
+  scene.add(new AmbientLight(0xf4ecdf, 0.9));
 
   const world = new Group();
   scene.add(world);
@@ -35,13 +35,14 @@ export function startScene(canvas, opts = {}) {
   // ---- cubes ----
   const COUNT = mobile ? 170 : 300;
   const R = mobile ? 1.75 : 2.75;
-  const gold = new MeshStandardMaterial({ color: 0xd4af37, metalness: 1, roughness: 0.22 });
-  const navy = new MeshStandardMaterial({ color: 0x1b2c55, metalness: 0.7, roughness: 0.28 });
-  const ink = new MeshStandardMaterial({ color: 0x0a1122, metalness: 0.9, roughness: 0.35 });
+  const gold = new MeshStandardMaterial({ color: 0xe9dcc6, metalness: 0.15, roughness: 0.35 });
+  const navy = new MeshStandardMaterial({ color: 0x7a5643, metalness: 0.25, roughness: 0.4 });
+  const ink = new MeshStandardMaterial({ color: 0x8fa98a, metalness: 0.15, roughness: 0.4 });
+  const pinkM = new MeshStandardMaterial({ color: 0xec9fb0, metalness: 0.2, roughness: 0.3 });
   const geo = new BoxGeometry(1, 1, 1);
-  const mats = [gold, navy, ink];
-  const split = [Math.round(COUNT * 0.34), Math.round(COUNT * 0.4)];
-  split.push(COUNT - split[0] - split[1]);
+  const mats = [gold, navy, ink, pinkM];
+  const split = [Math.round(COUNT * 0.36), Math.round(COUNT * 0.28), Math.round(COUNT * 0.24)];
+  split.push(COUNT - split[0] - split[1] - split[2]);
   const meshes = mats.map((m, i) => {
     const mesh = new InstancedMesh(geo, m, split[i]);
     mesh.instanceMatrix.setUsage(DynamicDrawUsage);
@@ -52,10 +53,12 @@ export function startScene(canvas, opts = {}) {
   const cubes = [];
   const rand = (a, b) => a + Math.random() * (b - a);
   let n = 0;
+  // mix the colors all over the sphere instead of in bands
+  const perm = [...Array(COUNT).keys()].sort(() => Math.random() - 0.5);
   meshes.forEach((mesh, mi) => {
     for (let j = 0; j < split[mi]; j++, n++) {
       // Fibonacci sphere target
-      const i = n + 0.5;
+      const i = perm[n] + 0.5;
       const phi = Math.acos(1 - (2 * i) / COUNT);
       const theta = Math.PI * (1 + Math.sqrt(5)) * i;
       const sphere = new Vector3(Math.cos(theta) * Math.sin(phi), Math.sin(theta) * Math.sin(phi), Math.cos(phi)).multiplyScalar(R);
@@ -82,7 +85,7 @@ export function startScene(canvas, opts = {}) {
   const LINKS = mobile ? 34 : 54;
   const linkGeo = new TorusGeometry(0.34, 0.085, 14, 36);
   linkGeo.scale(1.55, 1, 1);
-  const chainMat = new MeshStandardMaterial({ color: 0xe0bd4a, metalness: 1, roughness: 0.18 });
+  const chainMat = new MeshStandardMaterial({ color: 0xe8a7b4, metalness: 0.85, roughness: 0.22 });
   const chain = new InstancedMesh(linkGeo, chainMat, LINKS);
   chain.instanceMatrix.setUsage(DynamicDrawUsage);
   scene.add(chain);
