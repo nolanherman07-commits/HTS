@@ -28,9 +28,9 @@ export function startScene(canvas, opts = {}) {
   const camera = new PerspectiveCamera(mobile ? 50 : 38, innerWidth / innerHeight, 0.1, 100);
   camera.position.set(0, 0, 14);
 
-  const key = new DirectionalLight(0xffeccc, 2.2); key.position.set(5, 6, 8); scene.add(key);
-  const rim = new DirectionalLight(0x7f7e7c, 1.6); rim.position.set(-6, -2, -4); scene.add(rim);
-  scene.add(new AmbientLight(0x403f3d, 0.6));
+  const key = new DirectionalLight(0xfff1d6, 2.2); key.position.set(5, 6, 8); scene.add(key);
+  const rim = new DirectionalLight(0x3d8bff, 1.6); rim.position.set(-6, -2, -4); scene.add(rim);
+  scene.add(new AmbientLight(0x1b2440, 0.6));
 
   const world = new Group();
   scene.add(world);
@@ -38,9 +38,9 @@ export function startScene(canvas, opts = {}) {
   // ---- cubes ----
   const COUNT = mobile ? 170 : 300;
   const R = mobile ? 1.75 : 2.75;
-  const gold = new MeshStandardMaterial({ color: 0xc2a96e, metalness: 1, roughness: 0.26 });
-  const navy = new MeshStandardMaterial({ color: 0x3a3a3d, metalness: 0.7, roughness: 0.28 });
-  const ink = new MeshStandardMaterial({ color: 0x22211f, metalness: 0.9, roughness: 0.35 });
+  const gold = new MeshStandardMaterial({ color: 0xd9a944, metalness: 1, roughness: 0.26 });
+  const navy = new MeshStandardMaterial({ color: 0x2a2b31, metalness: 0.7, roughness: 0.28 });
+  const ink = new MeshStandardMaterial({ color: 0x15161a, metalness: 0.9, roughness: 0.35 });
   const geo = new BoxGeometry(1, 1, 1);
   const mats = [gold, navy, ink];
   const split = [Math.round(COUNT * 0.34), Math.round(COUNT * 0.4)];
@@ -110,7 +110,7 @@ export function startScene(canvas, opts = {}) {
   const LINKS = mobile ? 34 : 54;
   const linkGeo = new TorusGeometry(0.34, 0.085, 14, 36);
   linkGeo.scale(1.55, 1, 1);
-  const chainMat = new MeshStandardMaterial({ color: 0xcdb57c, metalness: 1, roughness: 0.18 });
+  const chainMat = new MeshStandardMaterial({ color: 0xe6bd5c, metalness: 1, roughness: 0.18 });
   const chain = new InstancedMesh(linkGeo, chainMat, LINKS);
   chain.instanceMatrix.setUsage(DynamicDrawUsage);
   scene.add(chain);
@@ -127,7 +127,7 @@ export function startScene(canvas, opts = {}) {
   const clock = new Clock();
   let gridP = 0, gp = 0;
   const yAxis = new Vector3(0, 1, 0), qFlip = new Quaternion(), qId = new Quaternion();
-  const flashCol = new Color(0xf0dfae), col = new Color();
+  const flashCol = new Color(0xffe08a), col = new Color();
   const wrap = (x) => Math.atan2(Math.sin(x), Math.cos(x));
 
   addEventListener("pointermove", (e) => {
@@ -184,8 +184,8 @@ export function startScene(canvas, opts = {}) {
         const ok = smooth(out * 1.5 - c.center * 0.5);       // centre bursts out first
         tmp.z += ok * (12 + c.center * 6);
         tmp.x *= 1 + ok * 0.6; tmp.y *= 1 + ok * 0.6;
-        const flash = Math.sin(Math.PI * fk) * gk;
-        col.copy(c.base).lerp(flashCol, Math.min(1, flash * 0.95 + ok * 0.4));
+        const flash = Math.sin(Math.PI * Math.min(fk, 0.5)) * gk; // turns gold and stays gold
+        col.copy(c.base).lerp(flashCol, Math.min(1, flash * 0.6 + ok * 0.3));
         c.mesh.setColorAt(c.j, col);
         s = s + (tile - s) * gk;
         dummy.scale.set(s * (1 + flash * 0.12), s * (1 + flash * 0.12), s * (1 - gk * 0.55));

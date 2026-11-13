@@ -126,23 +126,51 @@ if (reduced) {
   gsap.to(".giant span", { yPercent: -25, ease: "none",
     scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
 
-  // warp: the cubes come back, become a wall, flip gold, then burst into the live sites
+  // warp: the cubes come back, become a wall, flip gold, then burst into the live sites.
+  // It stops twice (HOLDS) so the visitor has to scroll again to continue.
+  const HOLDS = [0.3, 0.62];
+  // scroll progress -> scene progress, flat during the two holds
+  const gridAt = (p) => p < 0.26 ? (p / 0.26) * 0.31
+    : p < 0.4 ? 0.31
+    : p < 0.58 ? 0.31 + ((p - 0.4) / 0.18) * 0.25
+    : p < 0.72 ? 0.56
+    : 0.56 + ((p - 0.72) / 0.28) * 0.44;
+  let lastP = 0, locked = false;
+  const passed = HOLDS.map(() => false);
   const warpTl = gsap.timeline({
     defaults: { ease: "none" },
     scrollTrigger: {
-      trigger: "#warp", pin: ".warp-pin", start: "top top", end: () => "+=" + innerHeight * 2.4,
-      scrub: 0.6, invalidateOnRefresh: true,
-      onUpdate: (st) => scene && scene.setGrid(st.progress),
+      trigger: "#warp", pin: ".warp-pin", start: "top top", end: () => "+=" + innerHeight * 3.6,
+      scrub: 0.5, invalidateOnRefresh: true,
+      onUpdate: (st) => {
+        const p = st.progress;
+        scene && scene.setGrid(gridAt(p));
+        HOLDS.forEach((h, i) => {
+          if (p < h - 0.06) passed[i] = false;
+          if (!locked && !passed[i] && lastP < h && p >= h) {
+            passed[i] = true; locked = true;
+            const y = st.start + (st.end - st.start) * (h + 0.02);
+            if (lenis) { lenis.scrollTo(y, { immediate: true, force: true }); lenis.stop(); }
+            else scrollTo(0, y);
+            setTimeout(() => { locked = false; lenis && !root.classList.contains("menu-open") && lenis.start(); }, 750);
+          }
+        });
+        lastP = p;
+      },
       onLeaveBack: () => scene && scene.setGrid(0),
     },
   });
   warpTl
-    .to(".warp-line.l1", { opacity: 1, filter: "blur(0px)", duration: 0.14 }, 0.06)
-    .to(".warp-line.l1", { opacity: 0, filter: "blur(14px)", y: -30, duration: 0.07 }, 0.27)
-    .to(".warp-rays", { opacity: 1, rotate: 25, duration: 0.1 }, 0.34)
-    .to(".warp-line.l2", { opacity: 1, filter: "blur(0px)", duration: 0.1 }, 0.38)
-    .to(".warp-rays", { opacity: 0, rotate: 45, duration: 0.1 }, 0.5)
-    .to(".warp-line.l2", { opacity: 0, scale: 1.25, filter: "blur(10px)", duration: 0.07 }, 0.55)
+    .to(".warp-line.l1", { opacity: 1, filter: "blur(0px)", duration: 0.12 }, 0.12)
+    .to(".warp-hint.h1", { opacity: 1, duration: 0.04 }, 0.3)
+    .to(".warp-hint.h1", { opacity: 0, duration: 0.03 }, 0.39)
+    .to(".warp-line.l1", { opacity: 0, filter: "blur(14px)", y: -30, duration: 0.05 }, 0.4)
+    .to(".warp-rays", { opacity: 1, rotate: 25, duration: 0.1 }, 0.44)
+    .to(".warp-line.l2", { opacity: 1, filter: "blur(0px)", duration: 0.08 }, 0.52)
+    .to(".warp-hint.h2", { opacity: 1, duration: 0.04 }, 0.62)
+    .to(".warp-hint.h2", { opacity: 0, duration: 0.03 }, 0.71)
+    .to(".warp-rays", { opacity: 0, rotate: 45, duration: 0.1 }, 0.72)
+    .to(".warp-line.l2", { opacity: 0, scale: 1.25, filter: "blur(10px)", duration: 0.06 }, 0.72)
     .set({}, {}, 1);
 
   // work: pin the section and slide the sites sideways on desktop
@@ -161,6 +189,24 @@ if (reduced) {
       return () => tween.kill();
     },
   });
+
+  // dive: after the sideways gallery, the screen goes into the listing website,
+  // then it splits into strips that slide away to reveal what a lead does next
+  const typed = $("#diveTyped"), QUERY = typed.dataset.text, tp = { n: 0 };
+  gsap.timeline({
+    defaults: { ease: "none" },
+    scrollTrigger: { trigger: "#dive", pin: ".dive-pin", start: "top top", end: () => "+=" + innerHeight * 2.6, scrub: 0.5, invalidateOnRefresh: true },
+  })
+    .fromTo(".dive-screen", { scale: 0.42, borderRadius: 28, opacity: 0.2 }, { scale: 1, borderRadius: 0, opacity: 1, ease: "power2.inOut", duration: 0.34 }, 0)
+    .fromTo(".dive-label", { opacity: 1 }, { opacity: 0, duration: 0.1 }, 0.14)
+    .to(".dive-flash", { opacity: 0.55, duration: 0.05 }, 0.36)
+    .to(".dive-flash", { opacity: 0, duration: 0.08 }, 0.41)
+    .to(".dive-strip:nth-child(odd)", { yPercent: -101, ease: "power2.in", duration: 0.2, stagger: 0.025 }, 0.42)
+    .to(".dive-strip:nth-child(even)", { yPercent: 101, ease: "power2.in", duration: 0.2, stagger: 0.025 }, 0.435)
+    .fromTo(".dive-next", { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.18 }, 0.46)
+    .to(tp, { n: QUERY.length, duration: 0.2, onUpdate: () => { typed.textContent = QUERY.slice(0, Math.round(tp.n)); } }, 0.62)
+    .fromTo(".dive-results i", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.05, stagger: 0.03 }, 0.82)
+    .set({}, {}, 1);
 
   // portrait and phone mockups float slightly against the scroll
   $$(".parallax").forEach((el) => gsap.fromTo(el, { yPercent: 6 }, { yPercent: -6, ease: "none",
