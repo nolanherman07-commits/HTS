@@ -24,8 +24,12 @@ if (!reduced) {
   gsap.ticker.add((t) => lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
 }
+// menu and button jumps glide straight past the transition pauses
+let autoScrolling = false;
 const scrollToTarget = (target) => {
-  if (lenis) lenis.scrollTo(target, { offset: target === 0 ? 0 : -HEADER_H + 1, duration: 1.4 });
+  autoScrolling = true;
+  setTimeout(() => { autoScrolling = false; }, 2200);
+  if (lenis) lenis.scrollTo(target, { offset: target === 0 ? 0 : -HEADER_H + 1, duration: 1.4, onComplete: () => { autoScrolling = false; } });
   else if (target === 0) scrollTo({ top: 0 });
   else target.scrollIntoView({ behavior: "auto" });
 };
@@ -126,87 +130,7 @@ if (reduced) {
   gsap.to(".giant span", { yPercent: -25, ease: "none",
     scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
 
-  // ---- movie: search -> results -> click -> reviews -> live sites, played for the visitor ----
-  var movieOn = false, moviePlayed = false;
-  const MOVIE_AT = 0.74;
-  const mv = $("#movie"), mvTyped = $("#mvTyped"), mvQuery = mvTyped.dataset.text;
-  let movieTl = null;
-  function liveSitesY() {
-    const st = ScrollTrigger.getById("work");
-    return st ? st.start + 2 : $("#work").getBoundingClientRect().top + scrollY;
-  }
-  function endMovie() {
-    if (!movieOn) return;
-    movieTl && movieTl.kill();
-    const y = liveSitesY();
-    if (lenis) lenis.scrollTo(y, { immediate: true, force: true }); else scrollTo(0, y);
-    gsap.to(mv, { opacity: 0, duration: 0.6, ease: "power2.out", onComplete: () => {
-      mv.classList.remove("on"); gsap.set(mv, { opacity: 1 });
-      root.classList.remove("movie-on");
-      movieOn = false; lenis && lenis.start();
-    } });
-  }
-  function playMovie() {
-    movieOn = true; moviePlayed = true;
-    lenis && lenis.stop();
-    root.classList.add("movie-on");
-    mv.classList.add("on");
-    mvTyped.textContent = "";
-    const scenes = $$(".mv-scene", mv), cursor = $(".mv-cursor", mv), ring = $(".mv-cursor i", mv);
-    gsap.set(scenes, { autoAlpha: 0, scale: 1, y: 0, filter: "blur(0px)" });
-    gsap.set(".mv-card", { autoAlpha: 0, y: 30, scale: 0.94 });
-    gsap.set(".mv-hit", { autoAlpha: 0, y: 24 });
-    gsap.set([".mv-mini", ".mv-tabs", ".mv-imgs img"], { autoAlpha: 0 });
-    gsap.set(cursor, { autoAlpha: 0, x: innerWidth * 0.7, y: innerHeight * 0.75 });
-    gsap.set(".mv-flash", { opacity: 0 });
-    const tp = { n: 0 };
-    const goBtn = $(".mv-go", mv), top = $(".mv-hit.top", mv);
-    const center = (el) => { const r = el.getBoundingClientRect(); return { x: r.left + r.width * 0.5, y: r.top + r.height * 0.55 }; };
-    const click = () => gsap.fromTo(ring, { scale: 0.3, opacity: 1 }, { scale: 1.6, opacity: 0, duration: 0.45, ease: "power2.out" });
-    // camera follows the caret while it types, zoomed in, then pulls back
-    const cam = $(".mv-cam", mv), caret = $(".mv-caret", mv), box = $(".mv-search .mv-box", mv);
-    const ZOOM = innerWidth < 760 ? 2.1 : 2.6;
-    const offsetIn = (el) => { let x = 0, y = 0; while (el && el !== cam) { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; } return { x, y }; };
-    const followCaret = () => { const o = offsetIn(caret); gsap.set(cam, { transformOrigin: `${o.x}px ${o.y + 12}px` }); };
-    gsap.set(cam, { scale: ZOOM }); followCaret();
-    movieTl = gsap.timeline({ onComplete: endMovie })
-      // 1. the search, filmed close up
-      .fromTo(scenes[0], { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4 })
-      .to(tp, { n: mvQuery.length, duration: 2.6, ease: "none", onUpdate: () => { mvTyped.textContent = mvQuery.slice(0, Math.round(tp.n)); followCaret(); } }, "+=0.2")
-      .to(cam, { scale: 1, duration: 0.9, ease: "power3.inOut" }, "+=0.25")
-      .to(cursor, { autoAlpha: 1, duration: 0.2 }, "-=0.3")
-      .to(cursor, { x: () => center(box).x + box.offsetWidth * 0.3, y: () => center(box).y, duration: 0.5, ease: "power2.inOut" })
-      .add(click)
-      .to(box, { scale: 0.97, duration: 0.1, yoyo: true, repeat: 1 }, "<")
-      .to(scenes[0], { autoAlpha: 0, y: -40, filter: "blur(8px)", duration: 0.4, ease: "power2.in" }, "+=0.1")
-      // 2. the results, top one is Nolan
-      .set(scenes[1], { autoAlpha: 1 })
-      .fromTo([".mv-mini", ".mv-tabs"], { autoAlpha: 0, y: -16 }, { autoAlpha: 1, y: 0, duration: 0.35, stagger: 0.08 })
-      .fromTo(".mv-imgs img", { autoAlpha: 0, scale: 0.85 }, { autoAlpha: 1, scale: 1, duration: 0.45, stagger: 0.1, ease: "back.out(1.6)" }, "-=0.1")
-      .to(".mv-hit", { autoAlpha: 1, y: 0, duration: 0.45, stagger: 0.12, ease: "power3.out" }, "-=0.15")
-      .to(cursor, { autoAlpha: 1, x: () => center(top).x, y: () => center(top).y, duration: 0.8, ease: "power2.inOut" }, "+=0.7")
-      .to(top, { scale: 1.02, duration: 0.2, yoyo: true, repeat: 1 })
-      .add(click, "<")
-      .to(cursor, { autoAlpha: 0, duration: 0.2 })
-      // zoom into the top result
-      .to(scenes[1], { scale: 1.6, autoAlpha: 0, filter: "blur(6px)", duration: 0.6, ease: "power2.in", transformOrigin: () => {
-        const c = center(top); return `${c.x}px ${c.y}px`; } }, "<")
-      // 3. the reviews
-      .fromTo(scenes[2], { autoAlpha: 0, scale: 0.92 }, { autoAlpha: 1, scale: 1, duration: 0.6, ease: "power3.out" })
-      .to(".mv-card", { autoAlpha: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.14, ease: "back.out(1.6)" }, "-=0.2")
-      .to(scenes[2], { scale: 1.04, duration: 1.6, ease: "none" }, "+=0.1")
-      // 4. flash into the live sites
-      .to(".mv-card", { autoAlpha: 0, y: -60, scale: 0.9, duration: 0.4, stagger: 0.04, ease: "power2.in" })
-      .to(".mv-flash", { opacity: 1, duration: 0.25, ease: "power1.in" }, "-=0.15")
-      .add(() => {
-        const y = liveSitesY();
-        if (lenis) lenis.scrollTo(y, { immediate: true, force: true }); else scrollTo(0, y);
-      })
-      .to(".mv-flash", { opacity: 0, duration: 0.5, ease: "power1.out" }, "+=0.1")
-      .set(scenes, { autoAlpha: 0 }, "<");
-  }
-  $(".mv-skip").addEventListener("click", endMovie);
-  addEventListener("keydown", (e) => { if (movieOn && e.key === "Escape") endMovie(); });
+  var movieOn = false;
 
   // warp: the cubes come back, become a wall, flip gold, then burst into the live sites.
   // It stops twice (HOLDS) so the visitor has to scroll again to continue.
@@ -229,6 +153,7 @@ if (reduced) {
         scene && scene.setGrid(gridAt(p));
         HOLDS.forEach((h, i) => {
           if (p < h - 0.06) passed[i] = false;
+          if (autoScrolling) { if (p >= h) passed[i] = true; return; }
           if (!locked && !passed[i] && lastP < h && p >= h) {
             passed[i] = true; locked = true;
             const y = st.start + (st.end - st.start) * (h + 0.02);
@@ -237,8 +162,6 @@ if (reduced) {
             setTimeout(() => { locked = false; lenis && !movieOn && !root.classList.contains("menu-open") && lenis.start(); }, 750);
           }
         });
-        if (!movieOn && !moviePlayed && lastP < MOVIE_AT && p >= MOVIE_AT) playMovie();
-        if (p < 0.6) moviePlayed = false;
         lastP = p;
       },
       onLeaveBack: () => scene && scene.setGrid(0),
@@ -265,7 +188,7 @@ if (reduced) {
       const tween = gsap.to(track, {
         x: () => -dist(), ease: "none",
         scrollTrigger: {
-          id: "work", trigger: "#work", pin: ".work-pin", start: "top top", end: () => "+=" + dist(),
+          trigger: "#work", pin: ".work-pin", start: "top top", end: () => "+=" + dist(),
           scrub: 0.6, invalidateOnRefresh: true,
           onUpdate: (st) => gsap.set("#workBar", { scaleX: st.progress }),
         },
@@ -273,24 +196,6 @@ if (reduced) {
       return () => tween.kill();
     },
   });
-
-  // dive: after the sideways gallery, the screen goes into the listing website,
-  // then it splits into strips that slide away to reveal what a lead does next
-  const typed = $("#diveTyped"), QUERY = typed.dataset.text, tp = { n: 0 };
-  gsap.timeline({
-    defaults: { ease: "none" },
-    scrollTrigger: { trigger: "#dive", pin: ".dive-pin", start: "top top", end: () => "+=" + innerHeight * 2.6, scrub: 0.5, invalidateOnRefresh: true },
-  })
-    .fromTo(".dive-screen", { scale: 0.42, borderRadius: 28, opacity: 0.2 }, { scale: 1, borderRadius: 0, opacity: 1, ease: "power2.inOut", duration: 0.34 }, 0)
-    .fromTo(".dive-label", { opacity: 1 }, { opacity: 0, duration: 0.1 }, 0.14)
-    .to(".dive-flash", { opacity: 0.55, duration: 0.05 }, 0.36)
-    .to(".dive-flash", { opacity: 0, duration: 0.08 }, 0.41)
-    .to(".dive-strip:nth-child(odd)", { yPercent: -101, ease: "power2.in", duration: 0.2, stagger: 0.025 }, 0.42)
-    .to(".dive-strip:nth-child(even)", { yPercent: 101, ease: "power2.in", duration: 0.2, stagger: 0.025 }, 0.435)
-    .fromTo(".dive-next", { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.18 }, 0.46)
-    .to(tp, { n: QUERY.length, duration: 0.2, onUpdate: () => { typed.textContent = QUERY.slice(0, Math.round(tp.n)); } }, 0.62)
-    .fromTo(".dive-results i", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.05, stagger: 0.03 }, 0.82)
-    .set({}, {}, 1);
 
   // portrait and phone mockups float slightly against the scroll
   $$(".parallax").forEach((el) => gsap.fromTo(el, { yPercent: 6 }, { yPercent: -6, ease: "none",
