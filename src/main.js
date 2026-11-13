@@ -209,14 +209,14 @@ if (reduced) {
         head.innerHTML = head.innerHTML.split(/(<em>.*?<\/em>|\s+)/).filter((w) => w && w.trim())
           .map((w) => w.startsWith("<em>") ? `<em>${w.slice(4, -5).split(" ").map((x) => `<span class="zw">${x}</span>`).join(" ")}</em>` : `<span class="zw">${w}</span>`).join(" ");
       }
-      const D_SLIDE = 1, VH = innerHeight / Math.max(1, dist());
+      const D_SLIDE = 1, VH = innerHeight / Math.max(innerHeight * 0.35, dist()); // one card: a short pause before the zoom
       const D_ZOOM = 1.0 * VH, D_PUSH = 0.35 * VH, D_GRID = 0.6 * VH, D_PANEL = 0.7 * VH, D_TAIL = 0.6 * VH;
       const total = D_SLIDE + D_ZOOM + D_PUSH + D_GRID + D_PANEL + D_TAIL;
       const tl = gsap.timeline({
         defaults: { ease: "none" },
         scrollTrigger: {
           trigger: "#work", pin: ".work-pin", start: "top top",
-          end: () => "+=" + (dist() + innerHeight * (1.0 + 0.35 + 0.6 + 0.7 + 0.6)),
+          end: () => "+=" + (Math.max(innerHeight * 0.35, dist()) + innerHeight * (1.0 + 0.35 + 0.6 + 0.7 + 0.6)),
           scrub: 0.6, invalidateOnRefresh: true,
           onUpdate: (st) => gsap.set("#workBar", { scaleX: Math.min(1, (st.progress * total) / D_SLIDE) }),
         },
