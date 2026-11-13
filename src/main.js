@@ -1,4 +1,9 @@
 import { startScene } from "./scene.js";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "lenis";
+
+gsap.registerPlugin(ScrollTrigger);
 
 // Leads go to this email through FormSubmit (formsubmit.co). The first message
 // sends an "Activate form" email to this address; click it once.
@@ -9,107 +14,78 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const root = document.documentElement;
+const HEADER_H = 84;
+
+// ---- smooth scrolling (Lenis) wired into GSAP's clock ----
+let lenis = null;
+if (!reduced) {
+  lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+  lenis.on("scroll", ScrollTrigger.update);
+  gsap.ticker.add((t) => lenis.raf(t * 1000));
+  gsap.ticker.lagSmoothing(0);
+}
+const scrollToTarget = (target) => {
+  if (lenis) lenis.scrollTo(target, { offset: target === 0 ? 0 : -HEADER_H + 1, duration: 1.4 });
+  else if (target === 0) scrollTo({ top: 0 });
+  else target.scrollIntoView({ behavior: "auto" });
+};
 
 // ---- 3D scene ----
 let scene = null;
 try { scene = startScene($("#bg"), { reduced }); } catch (e) { scene = null; }
 if (!scene) root.classList.add("no-webgl");
 
-// ---- intro: a brick wall the visitor knocks down ----
-const intro = $("#intro"), wall = $("#wall");
-const bricks = [];
-function buildWall() {
-  wall.innerHTML = "";
-  bricks.length = 0;
-  const W = innerWidth, H = innerHeight;
-  const bw = W < 600 ? 74 : W < 1100 ? 104 : 128, bh = Math.round(bw * 0.42), gap = 4;
-  const rows = Math.ceil(H / (bh + gap)) + 1;
-  const shades = ["#c9a98a", "#b88f70", "#d6bc9c", "#a97f62", "#cdb294", "#bf9c7e", "#c7a383", "#b38a6c"];
-  const frag = document.createDocumentFragment();
-  for (let r = 0; r < rows; r++) {
-    const off = r % 2 ? -bw / 2 : 0;
-    for (let x = off; x < W; x += bw + gap) {
-      const el = document.createElement("div");
-      el.className = "brick";
-      const y = r * (bh + gap);
-      el.style.cssText = `left:${x}px;top:${y}px;width:${bw}px;height:${bh}px;--bc:${(() => { const q = Math.random(); return q < 0.05 ? "#e7a3b3" : q < 0.1 ? "#93ab8f" : shades[(Math.random() * shades.length) | 0]; })()}`;
-      frag.appendChild(el);
-      bricks.push({ el, cx: x + bw / 2, cy: y + bh / 2 });
-    }
-  }
-  wall.appendChild(frag);
-}
-
-let opened = false;
+// ---- intro: logo draws, screen splits, cubes assemble ----
 function finishIntro() {
+  if (root.classList.contains("opened")) return;
   root.classList.add("opened");
   scene && scene.assemble();
+  setTimeout(() => { root.classList.add("intro-done"); lenis && lenis.start(); }, 1400);
 }
-function knockDown(px, py) {
-  if (opened) return;
-  opened = true;
-  scrollTo(0, 0);
-  if (reduced) {
-    intro.style.transition = "opacity .5s";
-    intro.style.opacity = "0";
-    finishIntro();
-    setTimeout(() => root.classList.add("intro-done"), 600);
-    return;
-  }
-  intro.classList.add("shake");
-  const H = innerHeight;
-  // every brick gets blasted away from where the wall was hit, then falls
-  bricks.forEach((b) => {
-    const dx = b.cx - px, dy = b.cy - py;
-    const d = Math.hypot(dx, dy) || 1;
-    const force = Math.max(0, 1 - d / (Math.max(innerWidth, H) * 1.1));
-    b.vx = (dx / d) * (6 + 22 * force) + (Math.random() - 0.5) * 6;
-    b.vy = (dy / d) * (4 + 16 * force) - (8 + 10 * force) * Math.random();
-    b.vr = (Math.random() - 0.5) * (14 + 30 * force);
-    b.vz = 0.004 + Math.random() * 0.01;
-    b.x = 0; b.y = 0; b.r = 0; b.s = 1;
-    b.delay = Math.floor(d / 38); // ripple outward from the hit
-  });
-  let frame = 0;
-  setTimeout(finishIntro, 260);
-  const step = () => {
-    frame++;
-    let alive = 0;
-    for (const b of bricks) {
-      if (frame < b.delay) { alive++; continue; }
-      b.vy += 0.9;
-      b.x += b.vx; b.y += b.vy; b.r += b.vr; b.s = Math.max(0.4, b.s - b.vz);
-      if (b.cy + b.y < H + 200) alive++;
-      b.el.style.transform = `translate3d(${b.x}px,${b.y}px,0) rotate(${b.r}deg) scale(${b.s})`;
-    }
-    if (alive && frame < 160) requestAnimationFrame(step);
-    else root.classList.add("intro-done");
-  };
-  requestAnimationFrame(step);
+const seen = sessionStorage.getItem("hts-intro");
+if (reduced || seen) {
+  root.classList.add("skip-intro");
+  finishIntro();
+} else {
+  sessionStorage.setItem("hts-intro", "1");
+  root.classList.add("intro-run");
+  lenis && lenis.stop();
+  setTimeout(finishIntro, 2500);
+  $("#intro").addEventListener("click", finishIntro, { once: true });
 }
 
-buildWall();
-root.classList.add("intro-run");
-let resizeT;
-addEventListener("resize", () => { if (opened) return; clearTimeout(resizeT); resizeT = setTimeout(buildWall, 150); });
-intro.addEventListener("click", (e) => knockDown(e.clientX || innerWidth / 2, e.clientY || innerHeight / 2));
-$("#knock").addEventListener("click", (e) => {
-  e.stopPropagation();
-  const r = e.currentTarget.getBoundingClientRect();
-  knockDown(e.clientX || r.left + r.width / 2, e.clientY || r.top + r.height / 2);
-});
-addEventListener("keydown", (e) => { if (!opened && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); knockDown(innerWidth / 2, innerHeight / 2); } });
-$("#knock").focus({ preventScroll: true });
-
-// ---- header ----
+// ---- header + in-page links ----
 const header = $("#top");
-const onScroll = () => {
-  header.classList.toggle("scrolled", scrollY > 40);
-  const p = Math.min(scrollY / (innerHeight * 0.9), 1);
-  root.style.setProperty("--hero-p", p.toFixed(3));
-};
+const onScroll = () => header.classList.toggle("scrolled", scrollY > 40);
 addEventListener("scroll", onScroll, { passive: true });
 onScroll();
+
+$$('a[href^="#"]').forEach((a) => a.addEventListener("click", (e) => {
+  const id = a.getAttribute("href");
+  const target = id === "#" || id === "#top" ? 0 : $(id);
+  if (target === null) return;
+  e.preventDefault();
+  closeMenu();
+  scrollToTarget(target);
+  if (target !== 0) history.replaceState(null, "", id);
+}));
+
+// ---- mobile menu ----
+const menuBtn = $("#menuBtn"), menu = $("#mobileMenu");
+function closeMenu() {
+  if (!menu.classList.contains("open")) return;
+  menu.classList.remove("open");
+  menuBtn.setAttribute("aria-expanded", "false");
+  root.classList.remove("menu-open");
+  lenis && lenis.start();
+}
+menuBtn.addEventListener("click", () => {
+  const open = menu.classList.toggle("open");
+  menuBtn.setAttribute("aria-expanded", String(open));
+  root.classList.toggle("menu-open", open);
+  if (open) { lenis && lenis.stop(); $("a", menu).focus(); } else { lenis && lenis.start(); }
+});
+addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(); });
 
 // ---- headline words rise in ----
 let wi = 0;
@@ -130,88 +106,131 @@ function splitWords(node) {
 }
 $$("[data-split]").forEach(splitWords);
 
-// ---- reveal on scroll ----
-const io = new IntersectionObserver((es) => es.forEach((e) => {
-  if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
-}), { threshold: 0.14, rootMargin: "0px 0px -6% 0px" });
-$$(".reveal").forEach((el) => io.observe(el));
+// ---- scroll animations (GSAP ScrollTrigger) ----
+if (reduced) {
+  $$(".reveal").forEach((el) => el.classList.add("in"));
+} else {
+  // reveal in small staggered batches as they enter
+  ScrollTrigger.batch(".reveal", {
+    start: "top 88%",
+    once: true,
+    onEnter: (els) => {
+      els.forEach((el) => el.classList.add("in"));
+      gsap.to(els, { opacity: 1, y: 0, duration: 1, ease: "power3.out", stagger: 0.1, overwrite: true });
+    },
+  });
+
+  // hero text drifts up and fades as you leave it
+  gsap.to(".hero-inner", { yPercent: -18, opacity: 0, ease: "none",
+    scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+  gsap.to(".giant span", { yPercent: -25, ease: "none",
+    scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+
+  // work: pin the section and slide the sites sideways on desktop
+  ScrollTrigger.matchMedia({
+    "(min-width: 900px)": () => {
+      const track = $("#track");
+      const dist = () => Math.max(0, track.scrollWidth - innerWidth + 80);
+      const tween = gsap.to(track, {
+        x: () => -dist(), ease: "none",
+        scrollTrigger: {
+          trigger: "#work", pin: ".work-pin", start: "top top", end: () => "+=" + dist(),
+          scrub: 0.6, invalidateOnRefresh: true,
+          onUpdate: (st) => gsap.set("#workBar", { scaleX: st.progress }),
+        },
+      });
+      return () => tween.kill();
+    },
+  });
+
+  // portrait and phone mockups float slightly against the scroll
+  $$(".parallax").forEach((el) => gsap.fromTo(el, { yPercent: 6 }, { yPercent: -6, ease: "none",
+    scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true } }));
+}
+addEventListener("load", () => ScrollTrigger.refresh());
 
 // ---- count-up numbers ----
-const cio = new IntersectionObserver((es) => es.forEach((e) => {
-  if (!e.isIntersecting) return;
-  cio.unobserve(e.target);
-  const el = e.target, end = +el.dataset.count, pre = el.dataset.pre || "", suf = el.dataset.suf || "";
+$$("[data-count]").forEach((el) => {
+  const end = +el.dataset.count, pre = el.dataset.pre || "", suf = el.dataset.suf || "";
   if (reduced) { el.textContent = pre + end + suf; return; }
-  const t0 = performance.now(), dur = 1400;
-  const step = (now) => {
-    const k = Math.min((now - t0) / dur, 1), v = Math.round(end * (1 - Math.pow(1 - k, 3)));
-    el.textContent = pre + v + suf;
-    if (k < 1) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
-}), { threshold: 0.6 });
-$$("[data-count]").forEach((el) => cio.observe(el));
+  const o = { v: 0 };
+  ScrollTrigger.create({
+    trigger: el, start: "top 85%", once: true,
+    onEnter: () => gsap.to(o, { v: end, duration: 1.4, ease: "power3.out",
+      onUpdate: () => { el.textContent = pre + Math.round(o.v) + suf; } }),
+  });
+});
 
-// ---- work: pinned horizontal scroll on desktop ----
-const work = $("#work"), track = $("#track");
-function workScroll() {
-  if (!work || innerWidth < 900 || reduced) { track.style.transform = ""; return; }
-  const r = work.getBoundingClientRect();
-  const total = work.offsetHeight - innerHeight;
-  const p = Math.min(Math.max(-r.top / total, 0), 1);
-  const max = track.scrollWidth - innerWidth + 80;
-  track.style.transform = `translate3d(${-p * max}px,0,0)`;
-  $("#workBar").style.transform = `scaleX(${p})`;
-}
-function sizeWork() {
-  if (innerWidth < 900 || reduced) { work.style.height = ""; return; }
-  work.style.height = (track.scrollWidth - innerWidth + innerHeight + 200) + "px";
-}
-addEventListener("scroll", workScroll, { passive: true });
-addEventListener("resize", () => { sizeWork(); workScroll(); });
-addEventListener("load", () => { sizeWork(); workScroll(); });
-sizeWork(); workScroll();
-
-// ---- tilt on cards ----
-if (matchMedia("(hover: hover)").matches && !reduced) {
+// ---- tilt, magnetic buttons, cursor (mouse only) ----
+if (matchMedia("(hover: hover) and (pointer: fine)").matches && !reduced) {
   $$(".tilt").forEach((el) => {
     el.addEventListener("pointermove", (e) => {
       const r = el.getBoundingClientRect();
       const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
-      el.style.transform = `perspective(900px) rotateY(${x * 7}deg) rotateX(${-y * 7}deg) translateY(-4px)`;
+      gsap.to(el, { rotateY: x * 7, rotateX: -y * 7, y: -4, transformPerspective: 900, duration: 0.4, ease: "power2.out" });
       el.style.setProperty("--mx", (x + 0.5) * 100 + "%");
       el.style.setProperty("--my", (y + 0.5) * 100 + "%");
     });
-    el.addEventListener("pointerleave", () => { el.style.transform = ""; });
+    el.addEventListener("pointerleave", () => gsap.to(el, { rotateY: 0, rotateX: 0, y: 0, duration: 0.6, ease: "power3.out" }));
   });
 
-  // gold cursor ring
+  $$(".btn.gold").forEach((b) => {
+    b.addEventListener("pointermove", (e) => {
+      const r = b.getBoundingClientRect();
+      gsap.to(b, { x: (e.clientX - r.left - r.width / 2) * 0.18, y: (e.clientY - r.top - r.height / 2) * 0.25, duration: 0.4, ease: "power2.out" });
+    });
+    b.addEventListener("pointerleave", () => gsap.to(b, { x: 0, y: 0, duration: 0.6, ease: "elastic.out(1, 0.4)" }));
+  });
+
   const ring = $("#cursor");
-  let x = innerWidth / 2, y = innerHeight / 2, rx = x, ry = y;
-  addEventListener("pointermove", (e) => { if (e.pointerType !== "mouse" || (!e.clientX && !e.clientY)) return; x = e.clientX; y = e.clientY; ring.classList.add("on"); }, { passive: true });
-  const loop = () => {
-    rx += (x - rx) * 0.2; ry += (y - ry) * 0.2;
-    ring.style.transform = `translate3d(${rx}px,${ry}px,0)`;
-    requestAnimationFrame(loop);
-  };
-  loop();
+  const qx = gsap.quickTo(ring, "x", { duration: 0.25, ease: "power3" });
+  const qy = gsap.quickTo(ring, "y", { duration: 0.25, ease: "power3" });
+  addEventListener("pointermove", (e) => {
+    if (e.pointerType !== "mouse" || (!e.clientX && !e.clientY)) return;
+    qx(e.clientX); qy(e.clientY); ring.classList.add("on");
+  }, { passive: true });
   $$("a, button, .tilt, input, select, textarea").forEach((el) => {
     el.addEventListener("pointerenter", () => ring.classList.add("big"));
     el.addEventListener("pointerleave", () => ring.classList.remove("big"));
   });
 }
 
-// ---- compare table ----
-
-
-// ---- form ----
+// ---- form: inline errors, loading state, animated success ----
 const form = $("#leadForm"), note = $("#formNote");
+const rules = {
+  name: (v) => v.trim().length >= 2 || "Please add your name.",
+  phone: (v) => v.replace(/\D/g, "").length >= 10 || "Please add a 10-digit phone number.",
+  email: (v) => !v.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) || "That email doesn’t look right.",
+};
+function check(field) {
+  const rule = rules[field.name];
+  if (!rule) return true;
+  const res = rule(field.value);
+  const msg = $(`#err-${field.name}`);
+  const ok = res === true;
+  field.setAttribute("aria-invalid", String(!ok));
+  msg.textContent = ok ? "" : res;
+  return ok;
+}
+Object.keys(rules).forEach((n) => {
+  const f = form.elements[n];
+  f.addEventListener("blur", () => { if (f.value) check(f); });
+  f.addEventListener("input", () => { if (f.getAttribute("aria-invalid") === "true") check(f); });
+});
 form.addEventListener("submit", async (ev) => {
   ev.preventDefault();
-  if (!form.name.value.trim() || !form.phone.value.trim()) { note.textContent = "Please add your name and phone number."; return; }
   if (form._honey.value) return;
-  const btn = form.querySelector("button"), label = btn.textContent;
-  btn.disabled = true; btn.textContent = "Sending…";
+  const bad = Object.keys(rules).map((n) => form.elements[n]).filter((f) => !check(f));
+  if (bad.length) {
+    bad[0].focus();
+    if (!reduced) gsap.fromTo(bad[0], { x: -8 }, { x: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+    note.textContent = "Please fix the highlighted field.";
+    note.className = "fine err";
+    return;
+  }
+  const btn = form.querySelector("button[type=submit]"), label = btn.innerHTML;
+  btn.disabled = true; btn.classList.add("loading"); btn.innerHTML = '<span class="spin" aria-hidden="true"></span>Sending…';
+  note.textContent = ""; note.className = "fine";
   const data = Object.fromEntries(new FormData(form));
   delete data._honey;
   try {
@@ -222,11 +241,14 @@ form.addEventListener("submit", async (ev) => {
     });
     const res = await r.json().catch(() => ({}));
     if (!r.ok || String(res.success) !== "true") throw new Error(res.message || "not delivered");
-    form.reset(); btn.textContent = "Sent! Nolan will be in touch.";
-    note.textContent = "Thanks! Expect a call or text soon.";
+    form.reset();
+    form.classList.add("sent");
+    $("#formDone").hidden = false;
+    $("#formDone").focus();
   } catch (e) {
-    btn.textContent = label; btn.disabled = false;
-    note.innerHTML = 'Couldn’t send. Call or text <a href="tel:+18284045335">828-404-5335</a>.';
+    btn.innerHTML = label; btn.disabled = false; btn.classList.remove("loading");
+    note.className = "fine err";
+    note.innerHTML = 'Couldn’t send just now. Call or text <a href="tel:+18284045335">828-404-5335</a>.';
   }
 });
 
