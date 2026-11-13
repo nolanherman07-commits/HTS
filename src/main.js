@@ -126,6 +126,25 @@ if (reduced) {
   gsap.to(".giant span", { yPercent: -25, ease: "none",
     scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
 
+  // warp: the cubes come back, become a wall, flip gold, then burst into the live sites
+  const warpTl = gsap.timeline({
+    defaults: { ease: "none" },
+    scrollTrigger: {
+      trigger: "#warp", pin: ".warp-pin", start: "top top", end: () => "+=" + innerHeight * 2.4,
+      scrub: 0.6, invalidateOnRefresh: true,
+      onUpdate: (st) => scene && scene.setGrid(st.progress),
+      onLeaveBack: () => scene && scene.setGrid(0),
+    },
+  });
+  warpTl
+    .to(".warp-line.l1", { opacity: 1, filter: "blur(0px)", duration: 0.14 }, 0.06)
+    .to(".warp-line.l1", { opacity: 0, filter: "blur(14px)", y: -30, duration: 0.07 }, 0.27)
+    .to(".warp-rays", { opacity: 1, rotate: 25, duration: 0.1 }, 0.34)
+    .to(".warp-line.l2", { opacity: 1, filter: "blur(0px)", duration: 0.1 }, 0.38)
+    .to(".warp-rays", { opacity: 0, rotate: 45, duration: 0.1 }, 0.5)
+    .to(".warp-line.l2", { opacity: 0, scale: 1.25, filter: "blur(10px)", duration: 0.07 }, 0.55)
+    .set({}, {}, 1);
+
   // work: pin the section and slide the sites sideways on desktop
   ScrollTrigger.matchMedia({
     "(min-width: 900px)": () => {
